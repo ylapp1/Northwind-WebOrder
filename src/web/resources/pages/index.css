@@ -1,0 +1,12 @@
+
+div#orderFilters {
+    padding-bottom: 20px;
+}
+
+div.orderFilter {
+    display: inline-block;
+}
+
+input#dateRangeFilter {
+    width: 200px;
+}
