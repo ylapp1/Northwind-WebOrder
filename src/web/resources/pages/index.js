@@ -81,7 +81,8 @@ function renderQueryResultTable(_resultTableNode, _dataRows, _rowDataAttributes 
         }
 
         // Iterate over the property names (the column titles) of the result row
-        for (var dataRowColumnName in dataRow) {
+        for (var dataRowColumnName in dataRow)
+        {
             if (dataRow.hasOwnProperty(dataRowColumnName))
             {
                 var resultCell = dataRow[dataRowColumnName];
@@ -148,9 +149,20 @@ function applyFilters(_rows, _filters)
  */
 function initializeFilters()
 {
-    initializeComboBox("select#customerFilter", "customers", "Kunde");
-    initializeComboBox("select#workerFilter", "workers", "Sachbearbeiter");
-    initializeComboBox("select#providerFilter", "providers", "Lieferant");
+    var filterEventHandlers = {
+        change: function(_event){
+            var comboBox = $(_event.target);
+            var selectedOption = $(_event.target).find("option:selected")[0];
+
+            var resultTable = $("table#resultTable");
+            resultTable.data("filters")[comboBox.data("column")] = $(selectedOption).val();
+            renderResultTable();
+        }
+    };
+
+    initializeComboBox("select#customerFilter", "customers", "Kunde", filterEventHandlers);
+    initializeComboBox("select#workerFilter", "workers", "Sachbearbeiter", filterEventHandlers);
+    initializeComboBox("select#providerFilter", "providers", "Lieferant", filterEventHandlers);
     initializeDateRangeFilter("input#dateRangeFilter", "dateRange");
 }
 
@@ -160,8 +172,9 @@ function initializeFilters()
  * @param String _comboBoxSelector The combo box selector
  * @param String _dataURL The url from which the values for the combo box can be fetched
  * @param String _optionValueKey The key of the values in the data rows
+ * @param function[] _eventHandlers The list of event handlers to add to the combo box
  */
-function initializeComboBox(_comboBoxSelector, _dataURL, _optionValueKey)
+function initializeComboBox(_comboBoxSelector, _dataURL, _optionValueKey, _eventHandlers = {})
 {
     var comboBox = $(_comboBoxSelector);
     comboBox.empty();
@@ -175,14 +188,13 @@ function initializeComboBox(_comboBoxSelector, _dataURL, _optionValueKey)
         }
     });
 
-    comboBox.on("change", function(_event){
-        var comboBox = $(_event.target);
-        var selectedOption = $(_event.target).find("option:selected")[0];
-
-        var resultTable = $("table#resultTable");
-        resultTable.data("filters")[comboBox.data("column")] = $(selectedOption).val();
-        renderResultTable();
-    });
+    for (var eventName in _eventHandlers)
+    {
+        if (_eventHandlers.hasOwnProperty(eventName))
+        {
+            comboBox.on(eventName, _eventHandlers[eventName]);
+        }
+    }
 }
 
 /**
@@ -232,7 +244,7 @@ function initializeDateRangeFilter(_inputFieldSelector, _dataURL)
 }
 
 /**
- * Initializes the dialag windows.
+ * Initializes the dialog windows.
  */
 function initializeDialogs()
 {
@@ -242,6 +254,29 @@ function initializeDialogs()
         width: 500,
         autoOpen: false
     });
+
+    var createOrderDialog = $("div#createOrderDialog");
+    $(createOrderDialog).dialog({
+        resizable: true,
+        height: 500,
+        width: 500,
+        autoOpen: false
+    });
+    $("button#createOrderButton").on("click", function(){
+
+        // Reset the combo box selections
+        $("select#customer").val("all");
+        $("select#worker").val("all");
+        $("select#provider").val("all");
+
+        // Open the dialog
+        $(createOrderDialog).dialog("open");
+    });
+
+    // TODO: Find way to avoid fetching the exact same data twice
+    initializeComboBox("select#customer", "customers", "Kunde");
+    initializeComboBox("select#worker", "workers", "Sachbearbeiter");
+    initializeComboBox("select#provider", "providers", "Lieferant");
 }
 
 /**
@@ -267,5 +302,4 @@ function onTableRowClicked(_event)
     $.get("orderDetails", { orderId: clickedTableRowId }, function(_data, _status){
         renderQueryResultTable(orderDetailsResultTable, _data);
     });
-
 }

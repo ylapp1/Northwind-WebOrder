@@ -15,9 +15,13 @@ table#resultTable tr td:hover {
     cursor: pointer;
 }
 
-div#orderDetailsDialog {
+div#orderDetailsDialog, div#createOrderDialog {
     display: none;
 }
 span.ui-dialog-title {
     text-align: center;
+}
+
+form#createOrderForm select {
+    width: 100%;
 }
