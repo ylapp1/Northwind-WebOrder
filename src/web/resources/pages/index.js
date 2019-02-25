@@ -1,6 +1,8 @@
 
 $(document).ready(function(){
 
+    initializeDialogs();
+
     fetchDataRows().then(function(_dataRows){
         initializeResultTable(_dataRows);
         renderResultTable();
@@ -30,45 +32,76 @@ function initializeResultTable(_resultRows)
 }
 
 /**
- * Renders the result table.
+ * Renders a query result as a table.
+ *
+ * @param _resultTableNode The html node of the result table
+ * @param _dataRows The query result data rows
+ * @param _rowDataAttributes The attributes whose values will be saved in the table row elements inside "data-x" attributes"
+ * @param _eventHandlers The event handlers that will be added per table row
  */
-function renderResultTable()
+function renderQueryResultTable(_resultTableNode, _dataRows, _rowDataAttributes = {}, _eventHandlers = {})
 {
-    var resultTable = $("table#resultTable");
+    var resultTable = $(_resultTableNode);
     resultTable.empty();
 
-    var resultRows = applyFilters(resultTable.data("rows"), resultTable.data("filters"));
-
-    if (resultRows.length == 0) $(resultTable).html("Keine Einträge vorhanden");
+    if (_dataRows.length == 0) $(resultTable).html("Keine Einträge vorhanden");
     else
     { // Create the table headers
 
         var headerRow = $("<tr>");
-        for (var propertyName in resultRows[0])
+        for (var dataRowColumnName in _dataRows[0])
         {
-            headerRow.append($("<th>").html(propertyName));
+            headerRow.append($("<th>").html(dataRowColumnName));
         }
 
         resultTable.append($(headerRow));
     }
 
-    for (var i = 0; i < resultRows.length; i++)
+    for (var i = 0; i < _dataRows.length; i++)
     {
-        var resultRow = resultRows[i];
+        var dataRow = _dataRows[i];
         var tableRow = $("<tr>");
 
-        // Iterate over the property names (the column titles) of the result row
-        for (var propertyName in resultRow) {
-            if (resultRow.hasOwnProperty(propertyName))
+        // Additional data attributes per row
+        for (var attributeName in _rowDataAttributes)
+        {
+            if (_rowDataAttributes.hasOwnProperty(attributeName))
             {
-                var resultCell = resultRow[propertyName];
-                tableRow.append($("<td>").html(resultCell));
+                $(tableRow).data(attributeName, _dataRows[i][_rowDataAttributes[attributeName]]);
+            }
+        }
 
+        // Additional event handlers per row
+        for (var eventName in _eventHandlers)
+        {
+            if (_eventHandlers.hasOwnProperty(eventName))
+            {
+                $(tableRow).on(eventName, _eventHandlers[eventName]);
+            }
+        }
+
+        // Iterate over the property names (the column titles) of the result row
+        for (var dataRowColumnName in dataRow) {
+            if (dataRow.hasOwnProperty(dataRowColumnName))
+            {
+                var resultCell = dataRow[dataRowColumnName];
+                tableRow.append($("<td>").html(resultCell));
             }
         }
 
         $(resultTable).append($(tableRow));
     }
+}
+
+/**
+ * Renders the result table.
+ */
+function renderResultTable()
+{
+    var resultTable = $("table#resultTable");
+    var resultRows = applyFilters(resultTable.data("rows"), resultTable.data("filters"));
+
+    renderQueryResultTable(resultTable, resultRows, { "id": "BestellNr" }, { "click": onTableRowClicked });
 }
 
 /**
@@ -196,4 +229,43 @@ function initializeDateRangeFilter(_inputFieldSelector, _dataURL)
         });
 
     });
+}
+
+/**
+ * Initializes the dialag windows.
+ */
+function initializeDialogs()
+{
+    $("div#orderDetailsDialog").dialog({
+        resizable: true,
+        height: 500,
+        width: 500,
+        autoOpen: false
+    });
+}
+
+/**
+ * Handles a table row click event.
+ *
+ * @param _event The table row click event
+ */
+function onTableRowClicked(_event)
+{
+    var clickedTableCell = $(_event.target);
+    var clickedTableRow = $(clickedTableCell).parent();
+    var clickedTableRowId = $(clickedTableRow).data("id");
+
+    var orderDetailsDialog = $("div#orderDetailsDialog");
+
+    // Set the order id
+    $(orderDetailsDialog).find("span#orderId").text(clickedTableRowId);
+
+    var orderDetailsResultTable = $("table#orderDetails");
+    orderDetailsResultTable.empty();
+
+    $(orderDetailsDialog).dialog("open");
+    $.get("orderDetails", { orderId: clickedTableRowId }, function(_data, _status){
+        renderQueryResultTable(orderDetailsResultTable, _data);
+    });
+
 }

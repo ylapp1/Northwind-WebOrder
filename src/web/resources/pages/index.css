@@ -10,3 +10,14 @@ div.orderFilter {
 input#dateRangeFilter {
     width: 200px;
 }
+
+table#resultTable tr td:hover {
+    cursor: pointer;
+}
+
+div#orderDetailsDialog {
+    display: none;
+}
+span.ui-dialog-title {
+    text-align: center;
+}

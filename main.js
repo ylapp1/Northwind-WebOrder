@@ -12,7 +12,6 @@ let databaseConnection = mysql.createConnection({
   user: "root",
   password: "",
   database: "nordwind"
-  //database: "arbeitsblatt127_abfragen_unveraendert"
 });
 
 // Create a new WebServer

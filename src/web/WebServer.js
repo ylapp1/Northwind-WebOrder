@@ -50,6 +50,7 @@ class WebServer
         this.express.get("/workers", this.workersResponse.bind(this));
         this.express.get("/providers", this.providersResponse.bind(this));
         this.express.get("/dateRange", this.dateRangeResponse.bind(this));
+        this.express.get("/orderDetails", this.orderDetailsResponse.bind(this));
 
         // Static paths
         this.express.use("/css", express.static(__dirname + "/resources/pages"));
@@ -195,6 +196,36 @@ class WebServer
              FROM Bestellungen;
             `
         );
+    }
+
+    /**
+     * Responds to a request to the "/orderDetails" route.
+     *
+     * @param _request The request
+     * @param _response The response
+     */
+    orderDetailsResponse(_request, _response)
+    {
+        let orderId = _request.query.orderId;
+
+        if (orderId)
+        {
+            this.queryResponse(
+                _request,
+                _response,
+                `SELECT
+                   Artikelname,
+                   Anzahl,
+                   bestelldetails.Einzelpreis AS Einzelpreis,
+                   Rabatt,
+                   ROUND(bestelldetails.Einzelpreis * Anzahl * (1 - Rabatt), 2) AS Gesamtpreis
+                 FROM bestelldetails
+                   JOIN Artikel USING(ArtikelNr)
+                 WHERE
+                   BestellNr = ` + orderId + ";"
+            );
+        }
+        else _response.status(400).send("Could not fetch order details: No order id specified");
     }
 }
 
