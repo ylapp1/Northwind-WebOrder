@@ -16,7 +16,8 @@ let databaseConnection = mysql.createConnection({
   host: "127.0.0.1",
   user: "root",
   password: "",
-  database: "nordwind"
+  database: "nordwind",
+  multipleStatements: true
 });
 
 // Create a new WebServer

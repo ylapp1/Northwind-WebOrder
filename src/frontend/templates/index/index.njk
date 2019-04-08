@@ -23,6 +23,14 @@
         <link rel="stylesheet" href="jquery-ui/jquery-ui.min.css">
         <script src="jquery-ui/jquery-ui.min.js"></script>
 
+
+        {# flatpickr #}
+        <link rel="stylesheet" href="flatpickr/flatpickr.min.css">
+        <link rel="stylesheet" href="flatpickr/themes/dark.css">
+        <script src="flatpickr/flatpickr.min.js"></script>
+        <script src="flatpickr/l10n/de.js"></script>
+
+
         {# Bootstrap, Bootstrap-table and its dependencies #}
         <script src="popper-js/popper.min.js"></script>
 
@@ -41,17 +49,18 @@
         {# deep-eql (Required for DataFetcher) #}
         <script src="deep-eql/deep-eql.js"></script>
 
-        {# flatpickr #}
-        <link rel="stylesheet" href="flatpickr/flatpickr.min.css">
-        <link rel="stylesheet" href="flatpickr/themes/dark.css">
-        <script src="flatpickr/flatpickr.min.js"></script>
-        <script src="flatpickr/l10n/de.js"></script>
+        {# native toast #}
+        <link rel="stylesheet" href="native-toast/native-toast.css">
+        <script src="native-toast/native-toast.min.js"></script>
+
+        {# jsPdf #}
+        <script src="jspdf/jspdf.min.js"></script>
+        <script src="jspdf-autotable/jspdf.plugin.autotable.min.js"></script>
 
 
         {# Utils #}
         <script src="javascript/util/DataFetcher.js"></script>
         <script src="javascript/util/Dialog.js"></script>
-        <script src="javascript/util/TableBuilder.js"></script>
         <script src="javascript/util/Utils.js"></script>
 
         {# Create Order Dialog #}
@@ -60,6 +69,10 @@
         <script src="javascript/index/Dialog/CreateOrderDialog/OrderArticle.js"></script>
 
         <script src="javascript/index/Dialog/AddArticleDialog/AddArticleDialog.js"></script>
+
+        <script src="javascript/index/Dialog/StocksWarningsDialog/StocksWarningsDialog.js"></script>
+
+        <script src="javascript/index/OrderPdfCreator.js"></script>
 
         {# Custom scripts #}
         <script src="javascript/index/index.js"></script>
@@ -92,21 +105,11 @@
 
           <table id="resultTable"></table>
 
-          <div id="subTableToolBar">
-            <div class="form-inline" role="form">
-
-              {# Export order to pdf button #}
-              <div class="form-group">
-                <button class="btn btn-primary">Als PDF exportieren</button>
-              </div>
-
-            </div>
-          </div>
-
         </main>
 
         {% include "index/dialogs/create-order.njk" %}
         {% include "index/dialogs/add-article.njk" %}
+        {% include "index/dialogs/stocks-warnings.njk" %}
 
     </body>
 </html>

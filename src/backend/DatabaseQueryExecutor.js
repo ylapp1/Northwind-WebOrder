@@ -116,6 +116,7 @@ DatabaseQueryExecutor.queries = {
 
   // Dynamic Queries
   orderDetails:  `SELECT
+                    ArtikelNr,
                     Artikelname AS article_name,
                     Anzahl AS amount,
                     bestelldetails.Einzelpreis AS unit_price,

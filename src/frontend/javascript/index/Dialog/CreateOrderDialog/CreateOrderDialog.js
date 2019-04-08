@@ -44,19 +44,6 @@ CreateOrderDialog.prototype.initialize = function(){
     var self = this;
     $(this.dialogElement).find("form#createOrderForm").on("submit", this.saveOrder.bind(this));
 
-    $(this.dialogElement).find("input#additionalDiscount").on("change", function(_event){
-
-        var inputElement = _event.target;
-
-        Utils.resetValidity(inputElement);
-
-        var additionalDiscount = parseFloat($(inputElement).val());
-        self.order.setAdditionalDiscount(additionalDiscount);
-        self.renderSummary();
-
-        self.validateOrder();
-    });
-
     $(this.dialogElement).on("show.bs.modal", this.onShow.bind(this));
     $(this.dialogElement).on("shown.bs.modal", this.onShown.bind(this));
     $(this.dialogElement).find("button#saveOrderButton").on("click", this.saveOrder.bind(this));
@@ -280,11 +267,29 @@ CreateOrderDialog.prototype.saveOrder = function(_event)
     _event.preventDefault();
 
     this.addOrderWasClicked = true;
+
+    var self = this;
     if (this.validateOrder()){
-        this.order.save().then(function(){
-            alert("Bestellung erfolgreich eingetragen");
+        this.order.save().then(function(_stocksWarnings){
+
+            nativeToast({
+                message: "Bestellung erfolgreich eingetragen",
+                position: "north-east",
+                closeOnClick: true,
+
+                timeout: 5000,
+                type: "success"
+            });
+
+            if (_stocksWarnings.length > 0){
+                console.log(_stocksWarnings);
+                var stocksWarningsDialog = new StocksWarningsDialog(_stocksWarnings);
+                stocksWarningsDialog.initialize();
+                stocksWarningsDialog.show();
+            }
+
         }).catch(function(_errorMessage){
-            alert(_errorMessage);
+            self.showErrorMessage(_errorMessage);
         });
     }
 };
@@ -299,7 +304,6 @@ CreateOrderDialog.prototype.validateOrder = function()
     var nextErroneousOrderAttribute = this.order.validate();
     if (nextErroneousOrderAttribute !== null)
     {
-        console.log(nextErroneousOrderAttribute);
         this.renderErroneousOrderAttribute(nextErroneousOrderAttribute);
         return false;
     }
@@ -309,11 +313,9 @@ CreateOrderDialog.prototype.validateOrder = function()
 CreateOrderDialog.prototype.render = function()
 {
     // Reset the combo box selections
-    $(this.dialogElement).find("select#customer").val(this.order.getCustomerId());
-    $(this.dialogElement).find("select#worker").val(this.order.getWorkerId());
-    $(this.dialogElement).find("select#provider").val(this.order.getProviderId());
-
-    $(this.dialogElement).find("input#additionalDiscount").val(this.order.getAdditionalDiscount());
+    $("select#customer").val(this.order.getCustomerId()).trigger("change");
+    $("select#worker").val(this.order.getWorkerId()).trigger("change");
+    $("select#provider").val(this.order.getProviderId()).trigger("change");
 
     this.renderSummary();
 };
@@ -326,8 +328,7 @@ CreateOrderDialog.prototype.renderSummary = function()
     var totalPrice = this.order.calculateTotalPrice();
 
     var totalArticlesDiscount = this.order.calculateTotalArticleDiscount();
-    var totalDiscount = totalArticlesDiscount + this.order.getAdditionalDiscount();
-    var effectivePrice = totalPrice - totalDiscount;
+    var effectivePrice = totalPrice - totalArticlesDiscount;
 
     var effectivePriceText = Utils.formatNumberAsEuros(effectivePrice);
     $(this.dialogElement).find("span#effectivePrice").text(effectivePriceText);
@@ -340,44 +341,30 @@ CreateOrderDialog.prototype.renderSummary = function()
  */
 CreateOrderDialog.prototype.renderErroneousOrderAttribute = function(_erroneousOrderAttribute){
 
-    var formElement = $(this.dialogElement).find("form#createOrderForm");
-    alert(_erroneousOrderAttribute);
+    var errorMessage;
 
-    if (_erroneousOrderAttribute.attributeName === "customerId")
-    {
-        var customerSelect = $(formElement).find("select#customer")[0];
-        customerSelect.setCustomValidity(_erroneousOrderAttribute.errorMessage);
-    }
-
-    else if (_erroneousOrderAttribute.attributeName === "workerId")
-    {
-        var workerSelect = $(formElement).find("select#worker")[0];
-        workerSelect.setCustomValidity(_erroneousOrderAttribute.errorMessage);
-    }
-
-    else if (_erroneousOrderAttribute.attributeName === "providerId")
-    {
-        var providerSelect = $(formElement).find("select#provider")[0];
-        providerSelect.setCustomValidity(_erroneousOrderAttribute.errorMessage);
-    }
-
-    else if (_erroneousOrderAttribute.attributeName === "orderArticle")
+    if (_erroneousOrderAttribute.attributeName === "orderArticle")
     {
         var articleId = _erroneousOrderAttribute.articleId;
         var error = _erroneousOrderAttribute.error;
 
-        if (error.attribute === "discount")
-        {
-            var discountInputElement = $(formElement).find("tr[data-id=" + articleId + "] input");
-            console.log("tr[data-id=" + articleId + "] input:nth-child(2)");
-            console.log(discountInputElement);
-            discountInputElement[0].setCustomValidity(error.errorMessage);
-        }
+        errorMessage = "Fehler in Artikel " + articleId + ": " + error.errorMessage;
     }
+    else errorMessage = _erroneousOrderAttribute.errorMessage;
 
-    else if (_erroneousOrderAttribute.attributeName === "additionalDiscount")
-    {
-        var additionalDiscountInputElement = $(formElement).find("input#additionalDiscount")[0];
-        additionalDiscountInputElement.setCustomValidity(_erroneousOrderAttribute.errorMessage);
-    }
+    this.showErrorMessage(errorMessage);
+};
+
+/**
+ * Shows a error message.
+ */
+CreateOrderDialog.prototype.showErrorMessage = function(_message){
+    nativeToast({
+        message: _message,
+        position: "north-east",
+        closeOnClick: true,
+
+        timeout: 5000,
+        type: "error"
+    });
 };

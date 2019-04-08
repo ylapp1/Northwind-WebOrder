@@ -34,21 +34,15 @@
     </div>
 
     {# Add Article button #}
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="div#addArticleDialog">
+    <button id="addOrderArticlesButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="div#addArticleDialog">
       Artikel hinzufügen ...
     </button>
 
     {# Order Articles list #}
     <table id="orderArticlesTable"></table>
 
-
     {# Summary #}
-    <div class="form-group">
-      <label for="additionalDiscount">Zusatzrabatt:</label>
-      <input id="additionalDiscount" class="form-control" type="number" step="0.01" min=0>
-    </div>
-
-    <p>Gesamtpreis nach Abzug von Rabatten: <span id="effectivePrice"></span></p>
+    <p id="effectivePriceParagraph">Gesamtpreis nach Abzug von Rabatten: <span id="effectivePrice"></span></p>
 
   </form>
 

@@ -76,7 +76,15 @@ OrderArticle.prototype = {
      */
     validate: function(){
 
-        if (this.discount > this.amount * this.articlePrice)
+        if (this.amount === 0)
+        {
+            return { attribute: "amount", errorMessage: "Die Artikelanzahl muss größer als 1 sein." };
+        }
+        else if (this.discount < 0)
+        {
+            return { attribute: "discount", errorMessage: "Der Rabatt darf nicht kleiner als 0 sein." };
+        }
+        else if (this.discount > this.amount * this.article.Einzelpreis)
         {
             return { attribute: "discount", errorMessage: "Der Rabatt darf nicht größer sein als der Artikelwert" };
         }

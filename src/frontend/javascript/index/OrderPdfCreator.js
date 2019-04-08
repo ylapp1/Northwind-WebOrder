@@ -1,32 +1,104 @@
+/**
+ * @version 0.1
+ * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ */
 
-
+/**
+ * Creates a pdf from a order.
+ *
+ * @property {jsPDF} document The pdf document that will be written
+ */
 function OrderPdfCreator()
 {
+    this.document = new jsPDF();
 }
 
-// TODO: include jspdf and jspdf-autotable in index.njk
-// TODO: Instantiate this class in OrderList
 OrderPdfCreator.prototype = {
-    createPdfFromOrder: function(_orderDetails)
+
+    /**
+     * Creates a PDF file from order details.
+     *
+     * @param {Object} _orderData The order row from the database
+     * @param {Object} _orderDetails The corresponding order detail rows for the order row
+     */
+    createPdfFromOrder: function(_orderData, _orderDetails)
     {
-        var document = new jsPDF();
-
-        document.text("Nordwind Bestelldetails", 1, 1);
-        document.text("BestellNr: " + _orderDetails.orderId, 3, 1);
-        document.text("Kunde: " + _orderDetails.customerName, 4, 1);
-        document.text("Sachbearbeiter: " + _orderDetails.worker, 5, 1);
-        document.text("Versandfirma: " + _orderDetails.provider, 6, 1);
-        document.text("Bestelldatum: " + _orderDetails.orderDate, 7, 1);
-        document.text("Frachtkosten: " + _orderDetails.Frachtkosten, 8, 1);
-        document.text("Gesamtwert: " + _orderDetails.Gesamtwert, 9, 1);
-        document.text("Gesamtwarenwert: " + _orderDetails.Gesamtwarenwert, 10, 1);
-
-        document.autoTable({
-            theme: "striped",
-            head: [ "ArtikelNr", "Artikelname", "Anzahl", "Einzelpreis", "Rabatt", "Gesamtpreis" ],
-            body: _orderDetails.orderArticles
+        // Create objects for jspdf-autotable from the order details
+        var orderDetails = _orderDetails.map(function(_orderDetail){
+            return {
+                articleId: _orderDetail.ArtikelNr,
+                articleName: _orderDetail.article_name,
+                amount: _orderDetail.amount,
+                unitPrice: Utils.formatNumberAsEuros(_orderDetail.unit_price),
+                discount: Utils.formatNumberAsEuros(_orderDetail.discount),
+                totalPrice: Utils.formatNumberAsEuros(_orderDetail.total_price)
+            };
         });
 
-        document.save("Bestellung_" + _orderDetails.orderId + ".pdf");
+        // Write the headline
+        this.document.setFontSize(25);
+        this.writeCenteredText("Nordwind Bestelldetails", 20);
+
+        // Write the order data as a table
+        this.document.autoTable({
+            theme: "grid",
+
+            head: [],
+            showHead: false,
+            body: [
+                [ "BestellNr", _orderData.BestellNr ],
+                [ "Kunde", _orderData.Kunde ],
+                [ "Sachbearbeiter", _orderData.workerName ],
+                [ "Versandfirma", _orderData.shipperName ],
+                [ "Bestelldatum", Utils.formatDate(new Date(_orderData.BestellDatum)) ],
+                [ "Frachtkosten", Utils.formatNumberAsEuros(_orderData.Frachtkosten) ],
+                [ "Gesamtwert", Utils.formatNumberAsEuros(_orderData.Gesamtwert) ],
+                [ "Gesamtwarenwert", Utils.formatNumberAsEuros(_orderData.Gesamtwarenwert) ]
+            ],
+
+            margin: { top: 30 }
+        });
+
+        // Write the order articles as a table
+        this.document.autoTable({
+            theme: "striped",
+
+            columns: [{
+                header: "ArtikelNr",
+                dataKey: "articleId"
+            }, {
+                header: "Artikelname",
+                dataKey: "articleName"
+            }, {
+                header: "Anzahl",
+                dataKey: "amount"
+            }, {
+                header: "Einzelpreis",
+                dataKey: "unitPrice"
+            }, {
+                header: "Rabatt",
+                dataKey: "discount"
+            }, {
+                header: "Gesamtpreis",
+                dataKey: "totalPrice"
+            }],
+
+            body: orderDetails,
+            margin: { top: 60 },
+        });
+
+        // Save the PDF as "Bestellung_<orderId>"
+        this.document.save("Bestellung_" + _orderData.BestellNr + ".pdf");
+    },
+
+    /**
+     * Writes a centered line at a specified y position.
+     *
+     * @param {String} _text The text
+     * @param {int} _y The y position of the line in the document
+     */
+    writeCenteredText: function(_text, _y){
+        var pageWidth = this.document.internal.pageSize.width;
+        this.document.text(_text, pageWidth/2, _y, "center");
     }
 };

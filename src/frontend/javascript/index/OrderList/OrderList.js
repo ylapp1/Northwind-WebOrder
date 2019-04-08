@@ -50,7 +50,7 @@ OrderList.prototype = {
             search: true,
             filter: true,
             detailView: true,
-            cache: true,
+            //cache: true,
 
             toolbar: "#toolbar",
             theadClasses: "thead-dark",
@@ -72,7 +72,7 @@ OrderList.prototype = {
                 title: "Kunde",
                 sortable: true,
                 filter: {
-                    type: "select"
+                    type: "select",
                 }
             }, {
                 field: "workerName",
@@ -161,7 +161,7 @@ OrderList.prototype = {
         });
 
         dataFetcher.get("dateRange").then(function(_dateRange){
-            
+            // TODO
         });
     },
 
@@ -276,50 +276,55 @@ OrderList.prototype = {
 
         var orderId = _row.BestellNr;
 
-        var toolbar = $("div#subTableToolBar");
-        //$(toolbar).css("display: block");
-        var exportAsPdfButton = $(toolbar).find("button.exportAsPDFButton");
-        $(exportAsPdfButton).off(this.exportAsPdfButtonEventHandler);
-
-        var self = this;
-        this.exportAsPdfButtonEventHandler = function(){
-            self.exportAsPDF(_row, orderDetails);
-        };
-
-        $(this.exportAsPdfButton).on("click", this.exportAsPDFButtonEventHandler);
-
-        var orderDetailsTable = $("<table/>").bootstrapTable({
-
-            url: "orderDetails",
-            queryParams: { orderId: orderId },
-            formatNoMatches: function(){
-                return "Die Bestellung enthält keine Artikel";
-            },
-
-            toolbar: "#subTableToolBar",
-
-            columns: [{
-                field: "article_name",
-                title: "Artikelname"
-            }, {
-                field: "amount",
-                title: "Anzahl"
-            }, {
-                field: "unit_price",
-                title: "Einzelpreis",
-                formatter: Utils.formatNumberAsEuros
-            }, {
-                field: "discount",
-                title: "Rabatt",
-                formatter: Utils.formatNumberAsEuros
-            }, {
-                field: "total_price",
-                title: "Gesamtpreis",
-                formatter: Utils.formatNumberAsEuros
-            }]
+        var exportAsPdfButton = $("<button/>", {
+            class: "btn btn-primary",
+            text: "Als PDF exportieren",
+            style: "margin-bottom: 5px"
         });
 
-        $(_detail).append(orderDetailsTable);
+        var self = this;
+
+
+        dataFetcher.get("orderDetails", { orderId: orderId }).then(function(_orderDetails){
+
+            $(_detail).append(exportAsPdfButton);
+
+            $(exportAsPdfButton).on("click", function(){
+                self.exportAsPDF(_row, _orderDetails);
+            });
+
+            var orderDetailsTable = $("<table/>").bootstrapTable({
+
+                data: _orderDetails,
+                formatNoMatches: function(){
+                    return "Die Bestellung enthält keine Artikel";
+                },
+
+                toolbar: "#subTableToolBar",
+
+                columns: [{
+                    field: "article_name",
+                    title: "Artikelname"
+                }, {
+                    field: "amount",
+                    title: "Anzahl"
+                }, {
+                    field: "unit_price",
+                    title: "Einzelpreis",
+                    formatter: Utils.formatNumberAsEuros
+                }, {
+                    field: "discount",
+                    title: "Rabatt",
+                    formatter: Utils.formatNumberAsEuros
+                }, {
+                    field: "total_price",
+                    title: "Gesamtpreis",
+                    formatter: Utils.formatNumberAsEuros
+                }]
+            });
+
+            $(_detail).append(orderDetailsTable);
+        });
     },
 
     /**
@@ -327,9 +332,7 @@ OrderList.prototype = {
      */
     exportAsPDF: function(_orderData, _orderDetails)
     {
-        // Create new PdfCreator()
-        // save the pdf
-        console.log(_orderData);
-        console.log(_orderDetails);
+        var pdfCreator = new OrderPdfCreator();
+        pdfCreator.createPdfFromOrder(_orderData, _orderDetails);
     }
 };

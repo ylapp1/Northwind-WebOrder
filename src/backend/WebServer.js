@@ -70,6 +70,9 @@ class WebServer
         this.express.use("/deep-eql", express.static(__dirname + "/../../node_modules/deep-eql"));
         this.express.use("/flatpickr", express.static(__dirname + "/../../node_modules/flatpickr/dist"));
         this.express.use("/font-awesome", express.static(__dirname + "/../../node_modules/@fortawesome/fontawesome-free"));
+        this.express.use("/jspdf", express.static(__dirname + "/../../node_modules/jspdf/dist"));
+        this.express.use("/jspdf-autotable", express.static(__dirname + "/../../node_modules/jspdf-autotable/dist"));
+        this.express.use("/native-toast", express.static(__dirname + "/../../node_modules/native-toast/dist"));
         this.express.use("/jquery", express.static(__dirname + "/../../node_modules/jquery/dist"));
         this.express.use("/jquery-ui", express.static(__dirname + "/../../node_modules/jquery-ui-dist"));
         this.express.use("/popper-js", express.static(__dirname + "/../../node_modules/popper.js/dist/umd"));

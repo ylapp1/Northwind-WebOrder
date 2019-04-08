@@ -1,3 +1,7 @@
+/**
+ * @version 0.1
+ * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ */
 
 const mysql = require("mysql");
 
@@ -27,12 +31,6 @@ class OrderCreator
     {
         // Check the order articles
         if (! Array.isArray(_order.orderArticles) || _order.orderArticles.length === 0) return "Bestellung enthält keine Artikel";
-
-        if (Number.isNaN(_order.additionalDiscount) || _order.additionalDiscount < 0)
-        {
-            return "Zusatzrabtt der Bestellung ist ungültig";
-        }
-
 
         let orderArticle;
         for (let i = 0; i < _order.orderArticles.length; i++)
@@ -151,7 +149,7 @@ VALUES(
         };
 
         let sortedArticles = _order.orderArticles.sort(function(_articleA, _articleB){
-            return _articleA.article.ArtikelNr > _articleB.article.ArtikelNr;
+            return _articleA.articleId > _articleB.articleId;
         });
         let sortedArticleData = _articleData.sort(sortArticlesByArtikelNrAsc);
 
@@ -195,25 +193,25 @@ VALUES(
         };
 
         let sortedArticles = _order.orderArticles.sort(function(_articleA, _articleB){
-            return _articleA.article.ArtikelNr > _articleB.article.ArtikelNr;
+            return _articleA.articleId > _articleB.articleId;
         });
         let sortedArticleData = _articleData.sort(sortArticlesByArtikelNrAsc);
 
         let updateArticleStocksQueries = "";
         for (let i = 0; i < sortedArticles.length; i++)
         {
-            let newStocksAmount = sortedArticles[i].amount - sortedArticles[i].amount;
+            let newStocksAmount = sortedArticleData[i].Lagerbestand - sortedArticles[i].amount;
 
             let updateArticleStocksQuery = `UPDATE Artikel
 SET Lagerbestand = ` + newStocksAmount + `
-WHERE ArtikelNr = ` + sortedArticles[i].ArtikelNr + `;`;
+WHERE ArtikelNr = ` + sortedArticleData[i].ArtikelNr + `;`;
 
             updateArticleStocksQueries += updateArticleStocksQuery;
         }
 
         let self = this;
         return new Promise(function(_resolve, _reject){
-            self.databaseConnection.query(updateArticleStocksQueries, function(_result, _error){
+            self.databaseConnection.query(updateArticleStocksQueries, function(_error, _result){
                 if (_error) _reject(_error);
                 else _resolve("Bestellung eingetragen");
             });
@@ -340,9 +338,6 @@ WHERE ArtikelNr = ` + sortedArticles[i].ArtikelNr + `;`;
                     else
                     {
                         // Validate the discounts
-                        let totalPrice = 0;
-                        let totalArticleDiscount = 0;
-
                         for (let i = 0; i < _result.length; i++)
                         {
                             let resultRow = _result[i];
@@ -352,14 +347,6 @@ WHERE ArtikelNr = ` + sortedArticles[i].ArtikelNr + `;`;
                             {
                                 _reject("Ein Bestellartikel hat einen ungültigen Rabatt");
                             }
-
-                            totalPrice += orderArticlePrice;
-                            totalArticleDiscount += sortedOrderArticles[i].discount;
-                        }
-
-                        if (totalPrice - totalArticleDiscount - _order.additionalDiscount < 0)
-                        {
-                            _reject("Der Gesamtrabatt der Bestellung ist ungültig");
                         }
 
                         let stocksWarnings = self.checkMinimumStocks(_order, _result);

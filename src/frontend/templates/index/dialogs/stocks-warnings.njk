@@ -1,0 +1,19 @@
+{#
+ # @version 0.1
+ # @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ #}
+
+{# Dialog for stocks warnings list in the create order dialog #}
+
+{% extends "util/dialog.njk" %}
+
+{% set dialogId = "stocksWarningsDialog" %}
+{% set dialogTitle = "Lagerbestands-Warnungen" %}
+
+{% block dialogBody %}
+    <ul id="stocksWarningsList"></ul>
+{% endblock %}
+
+{% block dialogFooter %}
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+{% endblock %}

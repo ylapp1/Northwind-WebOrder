@@ -18,7 +18,6 @@ function Order()
     this.workerId = null;
     this.providerId = null;
     this.orderArticles = [];
-    this.additionalDiscount = 0;
 }
 
 Order.prototype = {
@@ -88,24 +87,6 @@ Order.prototype = {
         return this.orderArticles;
     },
 
-    /**
-     * Returns the additional discount.
-     *
-     * @return {float} The additional discount
-     */
-    getAdditionalDiscount: function(){
-        return this.additionalDiscount;
-    },
-
-    /**
-     * Sets the additional discount.
-     *
-     * @param {float} _additionalDiscount The additional discount
-     */
-    setAdditionalDiscount: function(_additionalDiscount){
-        this.additionalDiscount = _additionalDiscount;
-    },
-
 
     // Public Methods
 
@@ -117,7 +98,6 @@ Order.prototype = {
         this.workerId = null;
         this.providerId = null;
         this.orderArticles = [];
-        this.additionalDiscount = 0;
     },
 
     /**
@@ -258,16 +238,10 @@ Order.prototype = {
                 {
                     return {
                         attributeName: "orderArticle",
-                        articleId: this.orderArticles[i].getArticleId(),
+                        articleId: this.orderArticles[i].getArticle().ArtikelName,
                         error: nextErroneousAttribute
                     };
                 }
-            }
-
-            // Check the total discount
-            if (this.calculateTotalArticleDiscount() + this.additionalDiscount > this.calculateTotalPrice())
-            {
-                return { attributeName: "additionalDiscount", errorMessage: "Der Gesamtrabatt darf nicht größer sein als der Gesamtpreis" };
             }
         }
 
@@ -292,14 +266,13 @@ Order.prototype = {
             customerCode: this.customerId,
             workerId: this.workerId,
             providerId: this.providerId,
-            orderArticles: minifiedOrderArticles,
-            additionalDiscount: this.additionalDiscount
+            orderArticles: minifiedOrderArticles
         };
 
         return new Promise(function(_resolve, _reject){
             $.get("/createOrder", { order: order }, function(_result, _status){
                 if (_result.success === false) _reject(_result.errorMessage);
-                else _resolve(true);
+                else _resolve(_result.stocksWarnings);
             });
         });
     }

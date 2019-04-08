@@ -82,5 +82,16 @@ h5.modal-title {
 
 
 div#subTableToolBar {
-    display: none;
+    /*display: none;*/
+}
+
+p#effectivePriceParagraph {
+    margin-top: 5px;
+}
+button#addOrderArticlesButton {
+    margin: 3px 0;
+}
+
+div.native-toast-message {
+    cursor: pointer;
 }
