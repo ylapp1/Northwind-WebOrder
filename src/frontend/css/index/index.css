@@ -1,0 +1,86 @@
+
+body {
+}
+
+main {
+    padding: 10px;
+}
+
+h1 {
+    text-align: center;
+}
+
+div.filter {
+    margin: 0 !important;
+}
+span.select2-selection.select2-selection--single {
+    height: calc(1.5em + .75rem + 2px);
+    border-color: #ced4da;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 5px;
+}
+
+.select2-container--default .select2-selection--single span.select2-selection__rendered {
+    color: #495057;
+    line-height: 35px;
+    font-weight: normal;
+}
+
+div.flatpickr-wrapper {
+    width: 100%;
+}
+div.flatpickr-wrapper input.flatpickr-input {
+    text-align: center;
+}
+input.flatpickr-input[readonly] {
+    background: #FFF;
+}
+
+
+div#createOrderDialog div.form-group {
+    width: 100%;
+}
+div#createOrderDialog div.form-group label {
+    width: 20%;
+}
+div#createOrderDialog span.select2-container {
+    width: 80% !important;
+}
+div#createOrderDialog div.form-group input#additionalDiscount
+{
+    display: inline;
+    width: 79%;
+    margin-top: 5px;
+}
+
+
+table#addArticleArticles tr:hover
+{
+    cursor: pointer;
+}
+
+div#createOrderDialog, div#addArticleDialog {
+    display: none;
+}
+
+.modal-content, .modal-body {
+    width: 880px;
+}
+.modal-dialog {
+    max-width: 880px;
+}
+table#addArticleTable {
+    height: 200px;
+}
+
+h5.modal-title {
+    text-align: center;
+    width: 100%;
+}
+
+
+div#subTableToolBar {
+    display: none;
+}

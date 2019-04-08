@@ -1,12 +1,17 @@
 /**
+ * @version 0.1
+ * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ */
+
+/**
  * Provides a website to show the result of database queries.
  * The website can be visited via localhost:8080.
  */
 
-const WebServer = require(__dirname + "/src/web/WebServer");
+const WebServer = require(__dirname + "/src/backend/WebServer");
 const mysql = require("mysql");
 
-// Initialize connection to xampp MySQL server
+// Initialize the connection to the xampp MySQL server
 let databaseConnection = mysql.createConnection({
   host: "127.0.0.1",
   user: "root",

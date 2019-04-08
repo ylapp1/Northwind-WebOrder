@@ -1,0 +1,112 @@
+{#
+ # @version 0.1
+ # @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ #}
+
+<!DOCTYPE html>
+<html lang="de">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Nordwind Bestellverwaltung</title>
+
+
+        {# External libraries #}
+
+        {# Font awesome icons #}
+        <link rel="stylesheet" href="font-awesome/css/all.min.css">
+
+        {# jQuery #}
+        <script src="jquery/jquery.min.js"></script>
+
+        {# jQuery UI #}
+        <link rel="stylesheet" href="jquery-ui/jquery-ui.min.css">
+        <script src="jquery-ui/jquery-ui.min.js"></script>
+
+        {# Bootstrap, Bootstrap-table and its dependencies #}
+        <script src="popper-js/popper.min.js"></script>
+
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="bootstrap-table/bootstrap-table.min.css">
+        <script src="bootstrap-table/bootstrap-table.min.js"></script>
+        <script src="bootstrap-table/locale/bootstrap-table-de-DE.min.js"></script>
+
+        <link rel="stylesheet" href="select2/css/select2.min.css">
+        <script src="select2/js/select2.min.js"></script>
+        <script src="bootstrap-table/extensions/select2-filter/bootstrap-table-select2-filter.min.js"></script>
+
+
+        {# deep-eql (Required for DataFetcher) #}
+        <script src="deep-eql/deep-eql.js"></script>
+
+        {# flatpickr #}
+        <link rel="stylesheet" href="flatpickr/flatpickr.min.css">
+        <link rel="stylesheet" href="flatpickr/themes/dark.css">
+        <script src="flatpickr/flatpickr.min.js"></script>
+        <script src="flatpickr/l10n/de.js"></script>
+
+
+        {# Utils #}
+        <script src="javascript/util/DataFetcher.js"></script>
+        <script src="javascript/util/Dialog.js"></script>
+        <script src="javascript/util/TableBuilder.js"></script>
+        <script src="javascript/util/Utils.js"></script>
+
+        {# Create Order Dialog #}
+        <script src="javascript/index/Dialog/CreateOrderDialog/CreateOrderDialog.js"></script>
+        <script src="javascript/index/Dialog/CreateOrderDialog/Order.js"></script>
+        <script src="javascript/index/Dialog/CreateOrderDialog/OrderArticle.js"></script>
+
+        <script src="javascript/index/Dialog/AddArticleDialog/AddArticleDialog.js"></script>
+
+        {# Custom scripts #}
+        <script src="javascript/index/index.js"></script>
+        <script src="javascript/index/OrderList/OrderList.js"></script>
+
+        {# Custom Style #}
+        <link rel="stylesheet" href="css/index/index.css">
+
+    </head>
+
+    <body>
+        <header>
+            <h1>Nordwind Bestellverwaltung</h1>
+        </header>
+
+        <main>
+
+          <div id="toolbar">
+            <div class="form-inline" role="form">
+
+              {# Create order button #}
+              <div class="form-group">
+                <button class="btn btn-primary" data-toggle="modal" data-target="div#createOrderDialog">
+                  <i class="fas fa-plus"></i> Neue Bestellung anlegen ...
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <table id="resultTable"></table>
+
+          <div id="subTableToolBar">
+            <div class="form-inline" role="form">
+
+              {# Export order to pdf button #}
+              <div class="form-group">
+                <button class="btn btn-primary">Als PDF exportieren</button>
+              </div>
+
+            </div>
+          </div>
+
+        </main>
+
+        {% include "index/dialogs/create-order.njk" %}
+        {% include "index/dialogs/add-article.njk" %}
+
+    </body>
+</html>
