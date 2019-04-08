@@ -8,6 +8,7 @@ var dataFetcher;
 var orderList;
 
 // TODO: Rename worker to caseWorker
+// TODO: Fix field names from german to english
 $(window).on("load", function(){
 
     createOrderDialog = new CreateOrderDialog();

@@ -276,15 +276,17 @@ OrderList.prototype = {
 
         var orderId = _row.BestellNr;
 
+        // Create the "Export as PDF" button
         var exportAsPdfButton = $("<button/>", {
             class: "btn btn-primary",
-            text: "Als PDF exportieren",
             style: "margin-bottom: 5px"
         });
+        $(exportAsPdfButton).append($("<i/>", {
+            class: "fas fa-file-export"
+        }));
+        $(exportAsPdfButton).append(" Als PDF exportieren");
 
         var self = this;
-
-
         dataFetcher.get("orderDetails", { orderId: orderId }).then(function(_orderDetails){
 
             $(_detail).append(exportAsPdfButton);
