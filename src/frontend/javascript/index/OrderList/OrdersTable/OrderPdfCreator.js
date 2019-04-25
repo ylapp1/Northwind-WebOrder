@@ -4,7 +4,7 @@
  */
 
 /**
- * Creates a pdf from a order.
+ * Creates a PDF file from an order.
  *
  * @property {jsPDF} document The pdf document that will be written
  */
@@ -16,22 +16,27 @@ function OrderPdfCreator()
 OrderPdfCreator.prototype = {
 
     /**
-     * Creates a PDF file from order details.
+     * Creates a PDF file from an order.
      *
-     * @param {Object} _orderData The order row from the database
+     * @param {Object} _ordersRow The orders row of the order
      * @param {Object} _orderDetails The corresponding order detail rows for the order row
      */
     createPdfFromOrder: function(_orderData, _orderDetails)
     {
+        // Order the order detail rows by article id
+        var orderDetails = _orderDetails.sort(function(_orderDetailsA, _orderDetailsB){
+            return _orderDetailsA.article_id > _orderDetailsB.article_id;
+        });
+
         // Create objects for jspdf-autotable from the order details
-        var orderDetails = _orderDetails.map(function(_orderDetail){
+        orderDetails = orderDetails.map(function(_orderDetail){
             return {
-                articleId: _orderDetail.ArtikelNr,
+                articleId: _orderDetail.article_id,
                 articleName: _orderDetail.article_name,
                 amount: _orderDetail.amount,
                 unitPrice: Utils.formatNumberAsEuros(_orderDetail.unit_price),
-                discount: Utils.formatNumberAsEuros(_orderDetail.discount),
-                totalPrice: Utils.formatNumberAsEuros(_orderDetail.total_price)
+                discount: Utils.formatFloatAsPercent(_orderDetail.discount_percentage),
+                totalPrice: Utils.formatNumberAsEuros(_orderDetail.total_order_item_price)
             };
         });
 
@@ -46,14 +51,14 @@ OrderPdfCreator.prototype = {
             head: [],
             showHead: false,
             body: [
-                [ "BestellNr", _orderData.BestellNr ],
-                [ "Kunde", _orderData.Kunde ],
-                [ "Sachbearbeiter", _orderData.workerName ],
-                [ "Versandfirma", _orderData.shipperName ],
-                [ "Bestelldatum", Utils.formatDate(new Date(_orderData.BestellDatum)) ],
-                [ "Frachtkosten", Utils.formatNumberAsEuros(_orderData.Frachtkosten) ],
-                [ "Gesamtwert", Utils.formatNumberAsEuros(_orderData.Gesamtwert) ],
-                [ "Gesamtwarenwert", Utils.formatNumberAsEuros(_orderData.Gesamtwarenwert) ]
+                [ "BestellNr", _orderData.order_id ],
+                [ "Kunde", _orderData.customer_name ],
+                [ "Sachbearbeiter", _orderData.case_worker_name ],
+                [ "Versandfirma", _orderData.shipper_name ],
+                [ "Bestelldatum", Utils.formatDate(new Date(_orderData.order_date)) ],
+                [ "Gesamtwert", Utils.formatNumberAsEuros(_orderData.total_order_items_price) ],
+                [ "Frachtkosten", Utils.formatNumberAsEuros(_orderData.shipping_costs) ],
+                [ "Gesamtwarenwert", Utils.formatNumberAsEuros(_orderData.total_price) ]
             ],
 
             margin: { top: 30 }
@@ -87,8 +92,8 @@ OrderPdfCreator.prototype = {
             margin: { top: 60 },
         });
 
-        // Save the PDF as "Bestellung_<orderId>"
-        this.document.save("Bestellung_" + _orderData.BestellNr + ".pdf");
+        // Save the PDF as "Bestellung_<orderId>.pdf"
+        this.document.save("Bestellung_" + _orderData.order_id + ".pdf");
     },
 
     /**

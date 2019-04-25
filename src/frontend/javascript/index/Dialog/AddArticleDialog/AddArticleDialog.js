@@ -34,20 +34,19 @@ AddArticleDialog.prototype.initialize = function(){
         search: true,
 
         clickToSelect: true,
-        sortName: "ArtikelName",
 
         columns: [{
             field: "state",
             checkbox: true
         }, {
-            field: "ArtikelName",
+            field: "article_name",
             title: "Artikelname",
             searchable: true
         }, {
-            field: "Liefereinheit",
+            field: "delivery_unit",
             title: "Liefereinheit"
         }, {
-            field: "Einzelpreis",
+            field: "unit_price",
             title: "Einzelpreis",
             formatter: Utils.formatNumberAsEuros
         }]

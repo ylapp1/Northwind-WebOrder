@@ -3,8 +3,8 @@
  * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
  */
 
-const DatabaseQueryExecutor = require(__dirname + "/DatabaseQueryExecutor.js");
-const OrderCreator = require(__dirname + "/OrderCreator.js");
+const SelectQueryExecutor = require(__dirname + "/SelectQueryExecutor.js");
+const OrderCreator = require(__dirname + "/OrderCreator/OrderCreator.js");
 const express = require("express");
 const nunjucks = require("nunjucks");
 
@@ -24,7 +24,7 @@ class WebServer
      */
     constructor(_databaseConnection)
     {
-        this.databaseQueryExecutor = new DatabaseQueryExecutor(_databaseConnection);
+        this.selectQueryExecutor = new SelectQueryExecutor(_databaseConnection);
         this.orderCreator = new OrderCreator(_databaseConnection);
     }
 
@@ -79,7 +79,7 @@ class WebServer
         this.express.use("/select2", express.static(__dirname + "/../../node_modules/select2/dist"));
 
         this.initializeQueryResponses();
-        this.express.get("/createOrder", this.createOrderResponse.bind(this));
+        this.express.post("/createOrder", this.createOrderResponse.bind(this));
     }
 
     /**
@@ -87,6 +87,7 @@ class WebServer
      */
     initializeQueryResponses()
     {
+        // TODO: Rename routes
         let self = this;
         this.express.get("/orders", function(_request, _response){
             self.queryResponse(_request, _response, "orders");
@@ -96,19 +97,19 @@ class WebServer
             self.queryResponse(_request, _response, "customers");
         });
 
-        this.express.get("/workers", function(_request, _response){
-            self.queryResponse(_request, _response, "workers");
+        this.express.get("/case-workers", function(_request, _response){
+            self.queryResponse(_request, _response, "caseWorkers");
         });
 
-        this.express.get("/providers", function(_request, _response){
+        this.express.get("/shippers", function(_request, _response){
             self.queryResponse(_request, _response, "shippers");
         });
 
-        this.express.get("/dateRange", function(_request, _response){
+        this.express.get("/date-range", function(_request, _response){
             self.queryResponse(_request, _response, "dateRange");
         });
 
-        this.express.get("/orderDetails", function(_request, _response){
+        this.express.get("/order-details", function(_request, _response){
             let orderId = _request.query.orderId;
             if (orderId)
             {
@@ -132,7 +133,7 @@ class WebServer
      */
     queryResponse(_request, _response, _queryName, _arguments)
     {
-        this.databaseQueryExecutor.executeQuery(_queryName, _arguments).then(function(_result){
+        this.selectQueryExecutor.executeQuery(_queryName, _arguments).then(function(_result){
             _response.json(_result);
         });
     }
@@ -142,6 +143,7 @@ class WebServer
      */
     createOrderResponse(_request, _response)
     {
+        // TODO: Test this
         let order = _request.query.order;
         this.orderCreator.createOrder(order).then(function(_stocksWarnings){
             _response.send({ success: true, stocksWarnings: _stocksWarnings });

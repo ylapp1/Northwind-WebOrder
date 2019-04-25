@@ -3,6 +3,8 @@
  * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
  */
 
+// TODO: OrderArticlesTable
+
 /**
  * Dialog for creating new orders.
  *
@@ -67,16 +69,16 @@ CreateOrderDialog.prototype.initializeOrderArticlesTable = function(){
         uniqueId: "article.ArtikelNr",
 
         columns: [{
-            field: "article.ArtikelName",
+            field: "article.article_name",
             title: "Artikelname",
             footerFormatter: function(){
                 return "Gesamt";
             }
         }, {
-            field: "article.Liefereinheit",
+            field: "article.deliver_unit",
             title: "Liefereinheit"
         }, {
-            field: "article.Einzelpreis",
+            field: "article.unit_price",
             title: "Einzelpreis",
             formatter: Utils.formatNumberAsEuros,
             footerFormatter: function(){
@@ -91,7 +93,7 @@ CreateOrderDialog.prototype.initializeOrderArticlesTable = function(){
             formatter: this.getAmountInputElement.bind(this)
         }, {
             field: "discount",
-            title: "Rabatt",
+            title: "Rabatt (in %)",
             formatter: this.getDiscountInputElement.bind(this),
             footerFormatter: function(){
                 var totalDiscount = self.order.calculateTotalArticleDiscount();
@@ -163,7 +165,7 @@ CreateOrderDialog.prototype.initializeComboBoxes = function()
     dataFetcher.get("customers").then(function(_customers){
 
         var customers = _customers.map(function(_customer){
-            return { id: _customer.customerCode, text: _customer.name };
+            return { id: _customer.customer_code, text: _customer.customer_name };
         });
 
         $(customerSelect).select2({
@@ -182,10 +184,10 @@ CreateOrderDialog.prototype.initializeComboBoxes = function()
         });
     });
 
-    dataFetcher.get("workers").then(function(_workers){
+    dataFetcher.get("case-workers").then(function(_caseWorkers){
 
-        var workers = _workers.map(function(_worker){
-            return { id: _worker.id, text: _worker.Sachbearbeiter };
+        var workers = _caseWorkers.map(function(_caseWorker){
+            return { id: _caseWorker.id, text: _caseWorker.case_worker_name };
         });
 
         $(workerSelect).select2({
@@ -205,10 +207,10 @@ CreateOrderDialog.prototype.initializeComboBoxes = function()
 
     });
 
-    dataFetcher.get("providers").then(function(_providers){
+    dataFetcher.get("shippers").then(function(_shippers){
 
-        var providers = _providers.map(function(_provider){
-            return { id: _provider.id, text: _provider.shipperName };
+        var providers = _shippers.map(function(_shipper){
+            return { id: _shipper.id, text: _shipper.shipper_name };
         });
 
         $(providerSelect).select2({
@@ -287,6 +289,8 @@ CreateOrderDialog.prototype.saveOrder = function(_event)
                 stocksWarningsDialog.initialize();
                 stocksWarningsDialog.show();
             }
+
+            // TODO: refresh orders table
 
         }).catch(function(_errorMessage){
             self.showErrorMessage(_errorMessage);

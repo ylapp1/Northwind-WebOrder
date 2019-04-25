@@ -23,10 +23,15 @@ var Utils = {
      * @return {String} The formatted number
      */
     formatNumberAsEuros: function(_number){
+        if (! _number) return "";
         return _number.toFixed(2).replace(".", ",") + " €";
     },
 
     formatDate: function(_date){
-        return _date.toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return _date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+    },
+
+    formatFloatAsPercent: function(_float){
+        return (_float * 100) + " %";
     }
 };

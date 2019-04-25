@@ -270,7 +270,7 @@ Order.prototype = {
         };
 
         return new Promise(function(_resolve, _reject){
-            $.get("/createOrder", { order: order }, function(_result, _status){
+            $.post("/createOrder", { order: order }, function(_result, _status){
                 if (_result.success === false) _reject(_result.errorMessage);
                 else _resolve(_result.stocksWarnings);
             });
