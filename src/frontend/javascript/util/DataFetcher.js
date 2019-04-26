@@ -10,7 +10,6 @@
  * @property {Object[]} cachedResults The cached results
  * @property {int} cacheValidDurationInSeconds The number of seconds for which entries in the cache are valid before they must be refreshed
  */
-// TODO: Rename to QueryExecutor and use the REST stuff (if enough time to implement this)
 function DataFetcher()
 {
     this.cachedResults = [];

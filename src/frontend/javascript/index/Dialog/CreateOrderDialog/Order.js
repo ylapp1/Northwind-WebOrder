@@ -107,7 +107,7 @@ Order.prototype = {
      */
     addOrderArticle: function(_orderArticle){
 
-        var orderArticleIndex = this.getOrderArticleIndexByArticleId(_orderArticle.getArticle().ArtikelNr);
+        var orderArticleIndex = this.getOrderArticleIndexByArticleId(_orderArticle.getArticle().article_id);
         if (orderArticleIndex === null)
         {
             this.orderArticles.push(_orderArticle);
@@ -161,7 +161,7 @@ Order.prototype = {
 
         for (var i = 0; i < this.orderArticles.length; i++)
         {
-            if (this.orderArticles[i].getArticle().ArtikelNr === _articleId)
+            if (this.orderArticles[i].getArticle().article_id === _articleId)
             {
                 return i;
             }
@@ -180,7 +180,7 @@ Order.prototype = {
 
         var totalPrice = 0;
         this.orderArticles.forEach(function(_orderArticle){
-            totalPrice += _orderArticle.getArticle().Einzelpreis * _orderArticle.getAmount();
+            totalPrice += _orderArticle.getPrice();
         });
 
         return totalPrice;
@@ -195,7 +195,7 @@ Order.prototype = {
 
         var totalDiscount = 0;
         this.orderArticles.forEach(function(_orderArticle){
-            totalDiscount += _orderArticle.getDiscount();
+            totalDiscount += _orderArticle.getDiscountInEuros();
         });
 
         return totalDiscount;
@@ -238,7 +238,7 @@ Order.prototype = {
                 {
                     return {
                         attributeName: "orderArticle",
-                        articleId: this.orderArticles[i].getArticle().ArtikelName,
+                        articleName: this.orderArticles[i].getArticle().article_name,
                         error: nextErroneousAttribute
                     };
                 }
@@ -256,16 +256,16 @@ Order.prototype = {
         // Create a minimal object for the order
         var minifiedOrderArticles = this.orderArticles.map(function(_orderArticle){
             return {
-                articleId: _orderArticle.getArticle().ArtikelNr,
+                articleId: _orderArticle.getArticle().article_id,
                 amount: _orderArticle.getAmount(),
-                discount: _orderArticle.getDiscount()
+                discountPercentage: _orderArticle.getDiscount()
             };
         });
 
         var order = {
             customerCode: this.customerId,
             workerId: this.workerId,
-            providerId: this.providerId,
+            shipperId: this.providerId,
             orderArticles: minifiedOrderArticles
         };
 

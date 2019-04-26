@@ -13,6 +13,9 @@ h1 {
 div.filter {
     margin: 0 !important;
 }
+input#order_date-daterange-filter:focus {
+    box-shadow: none;
+}
 span.select2-selection.select2-selection--single {
     height: calc(1.5em + .75rem + 2px);
     border-color: #ced4da;

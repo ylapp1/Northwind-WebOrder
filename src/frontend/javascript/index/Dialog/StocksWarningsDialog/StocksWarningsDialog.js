@@ -1,4 +1,7 @@
-
+/**
+ * @version 0.1
+ * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ */
 
 /**
  * Dialog for the stocks warnings messages.

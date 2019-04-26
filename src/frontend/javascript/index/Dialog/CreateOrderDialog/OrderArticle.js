@@ -84,11 +84,31 @@ OrderArticle.prototype = {
         {
             return { attribute: "discount", errorMessage: "Der Rabatt darf nicht kleiner als 0 sein." };
         }
-        else if (this.discount > this.amount * this.article.Einzelpreis)
+        else if (this.discount > 100)
         {
-            return { attribute: "discount", errorMessage: "Der Rabatt darf nicht größer sein als der Artikelwert" };
+            return { attribute: "discount", errorMessage: "Der Rabatt darf nicht größer sein als 100%" };
         }
 
         return null;
+    },
+
+    /**
+     * Returns the total price without the discount subtracted.
+     *
+     * @return float The price
+     */
+    getPrice: function()
+    {
+        return this.article.unit_price * this.amount;
+    },
+
+    /**
+     * Returns the discount in euros.
+     *
+     * @return float The discount
+     */
+    getDiscountInEuros: function()
+    {
+        return this.getPrice() * (this.discount  / 100);
     }
 };

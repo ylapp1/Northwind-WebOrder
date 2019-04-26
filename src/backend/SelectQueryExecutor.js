@@ -89,7 +89,7 @@ SelectQueryExecutor.queries = {
                  \`bestellungen\`.\`BestellNr\` AS \`order_id\`,
                  \`kunden\`.\`Firma\` AS \`customer_name\`,
                  CONCAT(\`personal\`.\`Vorname\`, ' ', \`personal\`.\`Nachname\`) AS \`case_worker_name\`,
-                 UNIX_TIMESTAMP(CONVERT_TZ(\`bestellungen\`.\`Bestelldatum\`, '+00:00', 'Europe/Berlin')) * 1000 AS \`order_date\`,
+                 UNIX_TIMESTAMP(\`bestellungen\`.\`Bestelldatum\`) * 1000 AS \`order_date\`,
                  \`versandfirmen\`.\`Firma\` AS \`shipper_name\`,
                  \`bestellungen\`.\`Frachtkosten\` AS \`shipping_costs\`,
                  ROUND(SUM(\`bestelldetails\`.\`EinzelPreis\` * \`bestelldetails\`.\`Anzahl\` * (1 - \`bestelldetails\`.\`Rabatt\`)), 2) AS \`total_order_items_price\`
@@ -111,8 +111,8 @@ SelectQueryExecutor.queries = {
 
     // Database statistics
     dateRange: `SELECT
-                  UNIX_TIMESTAMP(CONVERT_TZ(MIN(\`bestellungen\`.\`Bestelldatum\`), '+00:00', 'Europe/Berlin')) * 1000 AS \`minimum_order_date\`,
-                  UNIX_TIMESTAMP(CONVERT_TZ(MAX(\`bestellungen\`.\`Bestelldatum\`), '+00:00', 'Europe/Berlin')) * 1000 AS \`maximum_order_date\`
+                  UNIX_TIMESTAMP(MIN(\`bestellungen\`.\`Bestelldatum\`)) * 1000 AS \`minimum_order_date\`,
+                  UNIX_TIMESTAMP(MAX(\`bestellungen\`.\`Bestelldatum\`)) * 1000 AS \`maximum_order_date\`
                 FROM \`bestellungen\`;`,
 
 

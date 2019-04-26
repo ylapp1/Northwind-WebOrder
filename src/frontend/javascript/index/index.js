@@ -5,16 +5,14 @@
 
 var createOrderDialog;
 var dataFetcher;
-var orderList;
+var ordersTable;
 
-// TODO: Rename worker to caseWorker
-// TODO: Fix field names from german to english
 $(window).on("load", function(){
 
     createOrderDialog = new CreateOrderDialog();
     dataFetcher = new DataFetcher();
-    orderList = new OrderList();
+    ordersTable = new OrdersTable();
 
     createOrderDialog.initialize();
-    orderList.initialize();
+    ordersTable.initialize();
 });

@@ -3,8 +3,6 @@
  * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
  */
 
-// TODO: OrderArticlesTable
-
 /**
  * Dialog for creating new orders.
  *
@@ -29,6 +27,20 @@ CreateOrderDialog.prototype = Object.create(Dialog.prototype);
 CreateOrderDialog.prototype.constructor = CreateOrderDialog;
 
 
+// Getters and Setters
+
+/**
+ * Returns the order of this CreateOrderDialog.
+ *
+ * @return {Order} The order
+ */
+CreateOrderDialog.prototype.getOrder = function(){
+    return this.order;
+};
+
+
+// Public Methods
+
 /**
  * Initializes the dialog.
  */
@@ -36,8 +48,8 @@ CreateOrderDialog.prototype.initialize = function(){
 
     Dialog.prototype.initialize.call(this);
 
-    this.orderArticlesTable = $(this.dialogElement).find("table#orderArticlesTable");
-    this.initializeOrderArticlesTable();
+    this.orderArticlesTable = new OrderArticlesTable(this, $(this.dialogElement).find("table#orderArticlesTable"));
+    this.orderArticlesTable.initialize();
 
     this.addArticleDialog.initialize();
     this.initializeComboBoxes();
@@ -45,125 +57,73 @@ CreateOrderDialog.prototype.initialize = function(){
     // Initialize event handlers
     var self = this;
     $(this.dialogElement).find("form#createOrderForm").on("submit", this.saveOrder.bind(this));
+    $(this.dialogElement).find("button#saveOrderButton").on("click", this.saveOrder.bind(this));
 
     $(this.dialogElement).on("show.bs.modal", this.onShow.bind(this));
     $(this.dialogElement).on("shown.bs.modal", this.onShown.bind(this));
-    $(this.dialogElement).find("button#saveOrderButton").on("click", this.saveOrder.bind(this));
-};
-
-CreateOrderDialog.prototype.initializeOrderArticlesTable = function(){
-
-    var self = this;
-    $(this.orderArticlesTable).bootstrapTable({
-
-        showFooter: true,
-
-        height: 200,
-        data: [],
-
-        formatNoMatches: function(){
-            return "Bestellung enthält keine Artikel";
-        },
-
-        sortName: "article.ArtikelName",
-        uniqueId: "article.ArtikelNr",
-
-        columns: [{
-            field: "article.article_name",
-            title: "Artikelname",
-            footerFormatter: function(){
-                return "Gesamt";
-            }
-        }, {
-            field: "article.deliver_unit",
-            title: "Liefereinheit"
-        }, {
-            field: "article.unit_price",
-            title: "Einzelpreis",
-            formatter: Utils.formatNumberAsEuros,
-            footerFormatter: function(){
-                var totalPrice = self.order.calculateTotalPrice();
-                self.renderSummary();
-
-                return Utils.formatNumberAsEuros(totalPrice);
-            }
-        }, {
-            field: "amount",
-            title: "Anzahl",
-            formatter: this.getAmountInputElement.bind(this)
-        }, {
-            field: "discount",
-            title: "Rabatt (in %)",
-            formatter: this.getDiscountInputElement.bind(this),
-            footerFormatter: function(){
-                var totalDiscount = self.order.calculateTotalArticleDiscount();
-                return Utils.formatNumberAsEuros(totalDiscount);
-            }
-        }]
-    });
-};
-
-CreateOrderDialog.prototype.getAmountInputElement = function(_value, _row, _index, _field)
-{
-    var inputElement = $("<input/>", {
-        type: "number",
-        value: _value,
-        class: "form-control",
-        min: 1,
-        "data-row-index": _index,
-        onchange: `var rowIndex = $(this).data("row-index");
-                   var newAmount = parseInt(this.value);
-
-                   $("table#orderArticlesTable").bootstrapTable("updateCell", {
-                     index: rowIndex,
-                     field: "amount",
-                     value: newAmount
-                   });`
-    });
-
-    return inputElement[0].outerHTML;
 };
 
 /**
- * Returns a input element string for a the discount column in the order articles table.
+ * Adds OrderArticle's to this dialogs order.
+ *
+ * @param {Object[]} _selectedArticles The list of selected article data rows
  */
-CreateOrderDialog.prototype.getDiscountInputElement = function(_value, _row, _index)
+CreateOrderDialog.prototype.addOrderArticles = function(_selectedArticle)
 {
-    var inputElement = $("<input/>", {
-        type: "number",
-        value: _value,
-        class: "form-control",
-        min: 0,
-        step: 0.01,
-        "data-row-index": _index,
-        onchange: `var rowIndex = $(this).data("row-index");
-                   var newDiscount = parseFloat(this.value);
-
-                   $("table#orderArticlesTable").bootstrapTable("updateCell", {
-                     index: rowIndex,
-                     field: "discount",
-                     value: newDiscount
-                   });`
+    var self = this;
+    _selectedArticle.forEach(function(_selectedArticle){
+        self.order.addOrderArticle(new OrderArticle(_selectedArticle));
     });
 
-    return inputElement[0].outerHTML;
+    this.orderArticlesTable.loadData(this.order.getOrderArticles());
+    this.render();
 };
+
+
+// Event Handlers
+
+/**
+ * Event handler that is called when the dialog is about to be shown.
+ */
+CreateOrderDialog.prototype.onShow = function(){
+
+    this.order.reset();
+    this.addOrderWasClicked = false;
+    this.render();
+
+    this.orderArticlesTable.clear();
+};
+
+/**
+ * Event handler that is called when the dialog rendering is complete.
+ */
+CreateOrderDialog.prototype.onShown = function(){
+    this.orderArticlesTable.redraw();
+};
+
+
+// Private Methods
 
 /**
  * Initializes the combo boxes for the customer, worker and provider selection.
+ * @private
  */
 CreateOrderDialog.prototype.initializeComboBoxes = function()
 {
-    var customerSelect = $(this.dialogElement).find("select#customer");
-    var workerSelect = $(this.dialogElement).find("select#worker");
-    var providerSelect = $(this.dialogElement).find("select#provider");
-
     var defaultItem = [ { id: "", text: "" } ];
 
     var self = this;
+    var onChangeHandler = function(_event, _orderSetMethodName){
+        var selectedValue = $(_event.target).val();
+        if (selectedValue === "") selectedValue = null;
 
+        self.order[_orderSetMethodName](selectedValue);
+        self.validateOrder();
+    };
+
+    // Initialize customer name combo box
+    var customerSelect = $(this.dialogElement).find("select#customer");
     dataFetcher.get("customers").then(function(_customers){
-
         var customers = _customers.map(function(_customer){
             return { id: _customer.customer_code, text: _customer.customer_name };
         });
@@ -174,94 +134,50 @@ CreateOrderDialog.prototype.initializeComboBoxes = function()
         });
 
         $(customerSelect).on("change", function(_event){
-            Utils.resetValidity(_event.target);
-
-            var customerId = $(_event.target).val();
-            if (customerId === "") customerId = null;
-
-            self.order.setCustomerId(customerId);
-            self.validateOrder();
+            onChangeHandler(_event, "setCustomerId");
         });
     });
 
+    // Initialize the case worker name combo box
+    var workerSelect = $(this.dialogElement).find("select#worker");
     dataFetcher.get("case-workers").then(function(_caseWorkers){
-
-        var workers = _caseWorkers.map(function(_caseWorker){
-            return { id: _caseWorker.id, text: _caseWorker.case_worker_name };
+        var caseWorkers = _caseWorkers.map(function(_caseWorker){
+            return { id: _caseWorker.case_worker_id, text: _caseWorker.case_worker_name };
         });
 
         $(workerSelect).select2({
             placeholder: "Sachbearbeiter wählen",
-            data: defaultItem.concat(workers)
+            data: defaultItem.concat(caseWorkers)
         });
 
         $(workerSelect).on("change", function(_event){
-            Utils.resetValidity(_event.target);
-
-            var workerId = $(_event.target).val();
-            if (workerId === "") workerId = null;
-
-            self.order.setWorkerId(workerId);
-            self.validateOrder();
+            onChangeHandler(_event, "setWorkerId");
         });
-
     });
 
+    // Initialize the shipper names combo box
+    var providerSelect = $(this.dialogElement).find("select#provider");
     dataFetcher.get("shippers").then(function(_shippers){
-
-        var providers = _shippers.map(function(_shipper){
-            return { id: _shipper.id, text: _shipper.shipper_name };
+        var shippers = _shippers.map(function(_shipper){
+            return { id: _shipper.shipper_id, text: _shipper.shipper_name };
         });
 
         $(providerSelect).select2({
             placeholder: "Versandfirma wählen",
-            data: defaultItem.concat(providers)
+            data: defaultItem.concat(shippers)
         });
 
         $(providerSelect).on("change", function(_event){
-            Utils.resetValidity(_event.target);
-
-            var providerId = $(_event.target).val();
-            if (providerId === "") providerId = null;
-
-            self.order.setProviderId(providerId);
-            self.validateOrder();
+            onChangeHandler(_event, "setProviderId");
         });
     });
-};
-
-CreateOrderDialog.prototype.onShow = function(){
-
-    this.order.reset();
-    this.addOrderWasClicked = false;
-    this.render();
-
-    $(this.orderArticlesTable).bootstrapTable("removeAll");
-    $(this.orderArticlesTable).bootstrapTable("showLoading");
-};
-
-CreateOrderDialog.prototype.onShown = function(){
-    $(this.orderArticlesTable).bootstrapTable("resetView");
-    $(this.orderArticlesTable).bootstrapTable("hideLoading");
-};
-
-
-CreateOrderDialog.prototype.addOrderArticles = function(_selectedArticle)
-{
-    var self = this;
-    _selectedArticle.forEach(function(_selectedArticle){
-        self.order.addOrderArticle(new OrderArticle(_selectedArticle));
-    });
-
-    $(this.orderArticlesTable).bootstrapTable("load", this.order.getOrderArticles());
-
-    this.render();
 };
 
 /**
  * Adds the order to the database.
  *
  * @param _event The event that triggered this addOrder call
+ * @private
  */
 CreateOrderDialog.prototype.saveOrder = function(_event)
 {
@@ -274,23 +190,15 @@ CreateOrderDialog.prototype.saveOrder = function(_event)
     if (this.validateOrder()){
         this.order.save().then(function(_stocksWarnings){
 
-            nativeToast({
-                message: "Bestellung erfolgreich eingetragen",
-                position: "north-east",
-                closeOnClick: true,
+            // Show a message that the order was successfully saved
+            Utils.showSuccessMessage("Bestellung erfolgreich eingetragen");
 
-                timeout: 5000,
-                type: "success"
-            });
-
-            if (_stocksWarnings.length > 0){
-                console.log(_stocksWarnings);
+            if (_stocksWarnings.length > 0)
+            {
                 var stocksWarningsDialog = new StocksWarningsDialog(_stocksWarnings);
                 stocksWarningsDialog.initialize();
                 stocksWarningsDialog.show();
             }
-
-            // TODO: refresh orders table
 
         }).catch(function(_errorMessage){
             self.showErrorMessage(_errorMessage);
@@ -298,12 +206,13 @@ CreateOrderDialog.prototype.saveOrder = function(_event)
     }
 };
 
-
-// Private Methods
-
+/**
+ * Validates this dialogs order if the "Save order" button was clicked at least once.
+ * @private
+ */
 CreateOrderDialog.prototype.validateOrder = function()
 {
-    if (! this.addOrderWasClicked)  return true;
+    if (! this.addOrderWasClicked) return true;
 
     var nextErroneousOrderAttribute = this.order.validate();
     if (nextErroneousOrderAttribute !== null)
@@ -314,6 +223,13 @@ CreateOrderDialog.prototype.validateOrder = function()
     else return true;
 };
 
+
+// Render Methods
+
+/**
+ * Renders the dialogs combo boxes and the summary.
+ * @private
+ */
 CreateOrderDialog.prototype.render = function()
 {
     // Reset the combo box selections
@@ -326,6 +242,7 @@ CreateOrderDialog.prototype.render = function()
 
 /**
  * Renders the summary of the total discounts and total prices.
+ * @private
  */
 CreateOrderDialog.prototype.renderSummary = function()
 {
@@ -339,9 +256,10 @@ CreateOrderDialog.prototype.renderSummary = function()
 };
 
 /**
- * Renders a errornous order attribute by setting the custom validity of the affected element to a error message.
+ * Renders a errornous order attribute by showing a toast message.
  *
  * @param {Object} _errornousOrderAttribute The errornous order attribute information
+ * @private
  */
 CreateOrderDialog.prototype.renderErroneousOrderAttribute = function(_erroneousOrderAttribute){
 
@@ -349,26 +267,12 @@ CreateOrderDialog.prototype.renderErroneousOrderAttribute = function(_erroneousO
 
     if (_erroneousOrderAttribute.attributeName === "orderArticle")
     {
-        var articleId = _erroneousOrderAttribute.articleId;
+        var articleName = _erroneousOrderAttribute.articleName;
         var error = _erroneousOrderAttribute.error;
 
-        errorMessage = "Fehler in Artikel " + articleId + ": " + error.errorMessage;
+        errorMessage = "Fehler in Artikel \"" + articleName + "\": " + error.errorMessage;
     }
     else errorMessage = _erroneousOrderAttribute.errorMessage;
 
-    this.showErrorMessage(errorMessage);
-};
-
-/**
- * Shows a error message.
- */
-CreateOrderDialog.prototype.showErrorMessage = function(_message){
-    nativeToast({
-        message: _message,
-        position: "north-east",
-        closeOnClick: true,
-
-        timeout: 5000,
-        type: "error"
-    });
+    Utils.showErrorMessage(errorMessage);
 };

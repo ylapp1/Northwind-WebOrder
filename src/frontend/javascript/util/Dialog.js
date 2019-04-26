@@ -6,16 +6,14 @@
 /**
  * Base class for dialogs.
  * Provides methods to initialize, show and close a dialog.
- * Internally uses the dialog functions of jQuery UI.
+ * Internally uses bootstrap dialogs/modals.
  *
  * @property {String} dialogElementSelector The css selector that targets the div element for this dialog
- * @property {Object} dialogSettings The settings for the jQuery UI dialog
  * @property {Node} dialogElement The html element for this dialog
  */
-function Dialog(_dialogElementSelector, _dialogSettings)
+function Dialog(_dialogElementSelector)
 {
     this.dialogElementSelector = _dialogElementSelector;
-    this.dialogSettings = _dialogSettings;
 }
 
 Dialog.prototype = {
@@ -26,14 +24,6 @@ Dialog.prototype = {
      */
     initialize: function(){
         this.dialogElement = $(this.dialogElementSelector);
-        //$(this.dialogElement).dialog(this.dialogSettings);
-
-        // Make the dialog resizable
-        /*$(this.dialogElement).find(".modal-content").resizable({
-            //alsoResize: ".modal-dialog",
-            minHeight: 300,
-            minWidth: 300
-        });*/
 
         // Make the dialog draggable
         $(this.dialogElement).find(".modal-dialog").draggable({
@@ -53,6 +43,5 @@ Dialog.prototype = {
      */
     close: function(){
         $(this.dialogElement).modal("hide");
-        //$(this.dialogElement).dialog("close");
     }
 };
