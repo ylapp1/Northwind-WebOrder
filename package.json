@@ -15,7 +15,7 @@
     "deep-eql": "^4.0.0",
     "express": "^4.16.4",
     "flatpickr": "^4.5.7",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.0",
     "jquery-ui-dist": "^1.12.1",
     "jspdf": "^1.5.3",
     "jspdf-autotable": "^3.1.1",

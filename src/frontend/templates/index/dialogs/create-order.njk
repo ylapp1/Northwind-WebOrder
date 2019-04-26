@@ -8,7 +8,7 @@
 {% extends "util/dialog.njk" %}
 
 {% set dialogId = "createOrderDialog" %}
-{% set dialogTitle ="Neue Bestellung anlegen" %}
+{% set dialogTitle = "Neue Bestellung anlegen" %}
 
 {% block dialogBody %}
   <form id="createOrderForm">
@@ -35,10 +35,10 @@
 
     {# Add Article button #}
     <button id="addOrderArticlesButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="div#addArticleDialog">
-      Artikel hinzufügen ...
+      <i class="fas fa-plus"></i> Artikel hinzufügen ...
     </button>
 
-    {# Order Articles list #}
+    {# OrderArticles table #}
     <table id="orderArticlesTable"></table>
 
     {# Summary #}

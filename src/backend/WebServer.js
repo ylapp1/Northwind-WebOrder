@@ -87,7 +87,6 @@ class WebServer
      */
     initializeQueryResponses()
     {
-        // TODO: Rename routes
         let self = this;
         this.express.get("/orders", function(_request, _response){
             self.queryResponse(_request, _response, "orders");

@@ -1,47 +1,91 @@
+/**
+ * @version 0.1
+ * @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ */
 
-body {
-}
+/* Custom styles for the index page */
 
+/** Generic element styles **/
 main {
     padding: 10px;
 }
-
 h1 {
     text-align: center;
 }
 
-div.filter {
-    margin: 0 !important;
-}
-input#order_date-daterange-filter:focus {
-    box-shadow: none;
-}
+
+/** Combo boxes **/
+
 span.select2-selection.select2-selection--single {
+    /* Height copied from bootstrap input to make all table filter inputs the same size */
     height: calc(1.5em + .75rem + 2px);
     border-color: #ced4da;
 }
-
 .select2-container--default .select2-selection--single .select2-selection__arrow {
+    /* Adjust the position of the small triangle on the right to the new height */
     top: 5px;
 }
-
 .select2-container--default .select2-selection--single span.select2-selection__rendered {
+    /* Make the selected value look like bootstrap input values */
     color: #495057;
     line-height: 35px;
     font-weight: normal;
 }
 
+
+/** Toasts **/
+div.native-toast-message {
+    cursor: pointer;
+}
+
+
+/** Orders table **/
+
+/*** General filter style ***/
+div.filter {
+    margin: 0 !important;
+}
+
+/*** Date range filter ***/
+input#order_date-daterange-filter:focus {
+    box-shadow: none;
+}
 div.flatpickr-wrapper {
     width: 100%;
 }
-div.flatpickr-wrapper input.flatpickr-input {
-    text-align: center;
-}
 input.flatpickr-input[readonly] {
+    /* The flatpickr input is in readonly mode but it shouldn't look like a disabled input field */
     background: #FFF;
 }
 
 
+/** Dialogs **/
+
+/*** Generic ***/
+
+/**** Change the size of the bootstrap dialogs ****/
+.modal-content, .modal-body {
+    width: 880px;
+}
+.modal-dialog {
+    max-width: 880px;
+}
+
+/**** Center the title ****/
+h5.modal-title {
+    text-align: center;
+    width: 100%;
+}
+
+
+/*** Hide all dialogs by default ***/
+div#createOrderDialog, div#addArticleDialog, div#stocksWarningsDialog {
+    display: none;
+}
+
+/*** Create order dialog style ***/
+
+/**** Style for the combo boxes and their labels ****/
 div#createOrderDialog div.form-group {
     width: 100%;
 }
@@ -51,50 +95,17 @@ div#createOrderDialog div.form-group label {
 div#createOrderDialog span.select2-container {
     width: 80% !important;
 }
-div#createOrderDialog div.form-group input#additionalDiscount
-{
-    display: inline;
-    width: 79%;
-    margin-top: 5px;
-}
 
-
-table#addArticleArticles tr:hover
-{
-    cursor: pointer;
-}
-
-div#createOrderDialog, div#addArticleDialog {
-    display: none;
-}
-
-.modal-content, .modal-body {
-    width: 880px;
-}
-.modal-dialog {
-    max-width: 880px;
-}
-table#addArticleTable {
-    height: 200px;
-}
-
-h5.modal-title {
-    text-align: center;
-    width: 100%;
-}
-
-
-div#subTableToolBar {
-    /*display: none;*/
-}
-
+/**** Style for the effective price text ****/
 p#effectivePriceParagraph {
     margin-top: 5px;
 }
+
+
+/*** Add articles dialog style ***/
+table#addArticleTable {
+    height: 200px;
+}
 button#addOrderArticlesButton {
     margin: 3px 0;
-}
-
-div.native-toast-message {
-    cursor: pointer;
 }
