@@ -96,6 +96,7 @@ OrderArticlesTable.prototype = {
     getAmountInputElement: function(_value, _row, _index, _field)
     {
         var inputElement = $("<input/>", {
+            id: _index + "-amount",
             type: "number",
             value: _value,
             class: "form-control",
@@ -109,7 +110,9 @@ OrderArticlesTable.prototype = {
                      index: rowIndex,
                      field: "amount",
                      value: newAmount
-                   });`
+                   });
+                   $("#" + rowIndex + "-amount").focus();
+                   `
         });
 
         return inputElement[0].outerHTML;

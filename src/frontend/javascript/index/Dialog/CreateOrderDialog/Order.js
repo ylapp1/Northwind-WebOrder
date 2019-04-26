@@ -57,7 +57,7 @@ Order.prototype = {
      * @param {int} _workerId The worker id
      */
     setWorkerId: function(_workerId){
-        this.workerId = _workerId;
+        this.workerId = parseInt(_workerId);
     },
 
     /**
@@ -75,7 +75,7 @@ Order.prototype = {
      * @param {int} _providerId The provider id
      */
     setProviderId: function(_providerId){
-        this.providerId = _providerId;
+        this.providerId = parseInt(_providerId);
     },
 
     /**
@@ -258,13 +258,13 @@ Order.prototype = {
             return {
                 articleId: _orderArticle.getArticle().article_id,
                 amount: _orderArticle.getAmount(),
-                discountPercentage: _orderArticle.getDiscount()
+                discountPercent: _orderArticle.getDiscount()
             };
         });
 
         var order = {
             customerCode: this.customerId,
-            workerId: this.workerId,
+            caseWorkerId: this.workerId,
             shipperId: this.providerId,
             orderArticles: minifiedOrderArticles
         };

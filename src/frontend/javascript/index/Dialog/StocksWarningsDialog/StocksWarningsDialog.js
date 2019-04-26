@@ -22,8 +22,12 @@ StocksWarningsDialog.prototype.initialize = function(){
     var warningMessagesList = $(this.dialogElement).find("ul#stocksWarningsList");
     $(warningMessagesList).empty();
     this.warningMessages.forEach(function(_warningMessage){
+
+        var message = _warningMessage.articleName + " (" + _warningMessage.articleId + ")" +
+                      ": Auf Lager: " + _warningMessage.newStock + ", Mindestbestand: " + _warningMessage.minimumStock;
+
         $(warningMessagesList).append($("<li/>", {
-            text: _warningMessage
+            text: message
         }));
     });
 };

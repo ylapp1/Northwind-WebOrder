@@ -6,6 +6,7 @@
 const SelectQueryExecutor = require(__dirname + "/SelectQueryExecutor.js");
 const OrderCreator = require(__dirname + "/OrderCreator/OrderCreator.js");
 const express = require("express");
+const bodyParser = require("body-parser");
 const nunjucks = require("nunjucks");
 
 /**
@@ -38,6 +39,9 @@ class WebServer
     {
         // Initialize the web server
         this.express = express();
+        this.express.use(bodyParser.urlencoded({ extended: true }));
+        this.express.use(bodyParser.json());
+
         this.initializeRoutes();
         this.express.listen(8080);
 
@@ -142,8 +146,7 @@ class WebServer
      */
     createOrderResponse(_request, _response)
     {
-        // TODO: Test this
-        let order = _request.query.order;
+        let order = _request.body.order;
         this.orderCreator.createOrder(order).then(function(_stocksWarnings){
             _response.send({ success: true, stocksWarnings: _stocksWarnings });
         }).catch(function(_errorMessage){

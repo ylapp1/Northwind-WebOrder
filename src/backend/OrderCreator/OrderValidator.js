@@ -34,7 +34,6 @@ class OrderValidator
     {
         let errorMessage = this.validateStructure(_order);
         if (errorMessage === null) errorMessage = this.validateValueRanges(_order);
-        // TODO: Validate that all order article article ids are unique
 
         if (errorMessage !== null) return new Promise(function(_resolve, _reject){
             _reject(errorMessage);
@@ -42,10 +41,10 @@ class OrderValidator
 
         let self = this;
         return new Promise(function(_resolve, _reject){
-            this.validateCustomerCode(_order).then(function(){
-                this.validateCaseWorkerId(_order).then(function(){
-                    this.validateShipperId(_order).then(function(){
-                        this.validateOrderArticles(_order).then(function(){
+            self.validateCustomerCode(_order).then(function(){
+                self.validateCaseWorkerId(_order).then(function(){
+                    self.validateShipperId(_order).then(function(){
+                        self.validateOrderArticles(_order).then(function(){
                             _resolve("Order is valid");
                         });
                     });
@@ -71,25 +70,17 @@ class OrderValidator
         if (typeof _order !== "object") return "The order is not an object";
 
         // Customer code field
-        let customerCodeDataType = (typeof _order.customerCode);
-        if (customerCodeDataType === "undefined") return "The order contains no customer code field";
-        else if (customerCodeDataType !== "string") return "The customer code of the order is not a string";
+        if (typeof _order.customerCode === "undefined") return "The order contains no customer code field";
 
         // Case worker id field
-        let caseWorkerIdDataType = (typeof _order.caseWorkerId);
-        if (caseWorkerIdDataType === "undefined") return "The order contains no case worker id field";
-        else if (caseWorkerIdDataType !== "number" || ! Number.isInteger(_order.caseWorkerId))
-        {
-            return "The case worker id of the order is not an integer";
-        }
+        let caseWorkerId = _order.caseWorkerId;
+        if (typeof caseWorkerId === "undefined") return "The order contains no case worker id field";
+        else if (parseInt(caseWorkerId) + "" !== caseWorkerId) return "The case worker id of the order is not an integer";
 
         // Shipper id field
-        let shipperIdDataType = (typeof _order.shipperId);
-        if (shipperIdDataType === "undefined") return "The order contains no shipper id field";
-        else if (shipperIdDataType !== "number" || ! Number.isInteger(_order.shipperId))
-        {
-            return "The shipper id of the order is not an integer";
-        }
+        let shipperId = _order.shipperId;
+        if (typeof shipperId === "undefined") return "The order contains no shipper id field";
+        else if (parseInt(shipperId) + "" !== shipperId) return "The shipper id of the order is not an integer";
 
         // Order articles field
         let orderArticlesDataType = (typeof _order.orderArticles);
@@ -106,24 +97,18 @@ class OrderValidator
             let orderArticle = _order.orderArticles[i];
 
             // Article id field
-            let articleIdDataType = (typeof orderArticle.articleId);
-            if (articleIdDataType === "undefined") return "Order article #" + i + " contains no article id field";
-            else if (articleIdDataType !== "number" || ! Number.isInteger(orderArticle.articleId))
-            {
-                return "The article id of order article #" + i + " is not an integer";
-            }
+            let articleId = orderArticle.articleId;
+            if (typeof articleId === "undefined") return "Order article #" + i + " contains no article id field";
+            else if (parseInt(articleId) + "" !== articleId) return "The article id of order article #" + i + " is not an integer";
 
             // Amount field
-            let amountDataType = (typeof orderArticle.amount);
-            if (amountDataType === "undefined") return "Order article #" + i + " contains no amount field";
-            else if (amountDataType !== "number" || ! Number.isInteger(orderArticle.amount))
-            {
-                return "The amount of order article #" + i + " is not an integer";
-            }
+            let amount = orderArticle.amount;
+            if (typeof amount === "undefined") return "Order article #" + i + " contains no amount field";
+            else if (parseInt(amount) + "" !== amount) return "The amount of order article #" + i + " is not an integer";
 
-            let discountPercentDataType = (typeof orderArticle.discountPercent);
-            if (discountPercentDataType === "undefined") return "Order article #" + i + " contains no discount percent field";
-            else if (discountPercentDataType !== "number" || orderArticle.discountPercent === NaN || orderArticle.discountPercent === Infinity)
+            let discountPercent = orderArticle.discountPercent;
+            if (typeof discountPercent === "undefined") return "Order article #" + i + " contains no discount percent field";
+            else if (parseFloat(discountPercent) + "" !== discountPercent)
             {
                 return "The discount percent of order article #" + i + " is not a float";
             }
@@ -240,7 +225,7 @@ class OrderValidator
         let shipperIdQuery = `SELECT
                                 \`versandfirmen\`.\`FirmenNr\`
                               FROM \`versandfirmen\`
-                              WHERE \`versanfirmen\`.\`FirmenNr\` = ` + _order.shipperId + `;`;
+                              WHERE \`versandfirmen\`.\`FirmenNr\` = ` + _order.shipperId + `;`;
 
         let self = this;
         return new Promise(function(_resolve, _reject){
@@ -273,13 +258,13 @@ class OrderValidator
     validateOrderArticles(_order)
     {
         let articleIds = _order.orderArticles.map(function(_orderArticle){
-            return _orderArticle.articleId;
+            return parseInt(_orderArticle.articleId);
         });
 
         let articleIdsQuery = `SELECT
                                  \`artikel\`.\`ArtikelNr\` AS \`article_id\`
                                FROM \`artikel\`
-                               WHERE \`article_id\` IN (` + articleIds.join(",") + `);`;
+                               WHERE \`Artikel\`.\`ArtikelNr\` IN (` + articleIds.join(",") + `);`;
 
         let self = this;
         return new Promise(function(_resolve, _reject){

@@ -138,24 +138,24 @@ class OrderCreator
      */
     insertOrderIntoOrdersTable(_newOrderId, _order)
     {
-        let insertOrderQuery = `INSERT INTO \`bestellungen\`
-                                (?)
-                                VALUES (?);`;
-
         let columnNames = [ "BestellNr", "KundenCode", "PersonalNr", "Bestelldatum", "Lieferdatum", "Versanddatum",
                             "Versandueber", "Frachtkosten", "Empfaenger", "Strasse", "Ort", "Region", "PLZ",
                             "Bestimmungsland"
                           ];
-        let columnValues = [ _newOrderId, mysql.escape(_order.customerCode), _order.caseWorkerId, "NOW()", "NOW()", "NOW()",
+        let columnValues = [ _newOrderId, _order.customerCode, _order.caseWorkerId, new Date(), new Date(), new Date(),
                              _order.shipperId, 1.5, "Max Mustermann", "Musterstrasse 2", "Musterhausen", "Musterregion", "1111",
                              "Musterland"
                            ];
 
+        let insertOrderQuery = `INSERT INTO \`bestellungen\`
+                                (` + columnNames.join(",") + `)
+                                VALUES (?)`;
+
         var self = this;
         return new Promise(function(_resolve, _reject){
-            self.databaseConnection.query(insertOrderQuery, [ columnNames, columnValues ], function(_error, _result){
+            self.databaseConnection.query(insertOrderQuery, [ columnValues ], function(_error, _result){
                 if (_error) _reject(_error);
-                else  _resolve("Added order to \"bestellungen\" table");
+                else _resolve("Added order to \"bestellungen\" table");
             });
         });
     }
@@ -173,20 +173,27 @@ class OrderCreator
      */
     saveOrderArticles(_orderId, _order)
     {
+        let sortedOrderArticles = _order.orderArticles.sort(function(_orderArticleA, _orderArticleB){
+            return _orderArticleA.articleId > _orderArticleB.articleId;
+        });
+        let orderArticleIds = sortedOrderArticles.map(function(_orderArticle){
+            return _orderArticle.articleId;
+        });
+
         let articlesDataQuery = `SELECT
+                                   \`artikel\`.\`Artikelname\` AS \`article_name\`,
                                    \`artikel\`.\`Einzelpreis\` AS \`unit_price\`,
-                                   \`artikel\`.\`Lagerbestand\` AS \`stock\`
+                                   \`artikel\`.\`Lagerbestand\` AS \`stock\`,
                                    \`artikel\`.\`Mindestbestand\` AS \`minimum_stock\`
                                  FROM \`artikel\`
+                                 WHERE \`Artikel\`.\`ArtikelNr\` IN (` + orderArticleIds.join(",") + `)
                                  ORDER BY \`artikel\`.\`ArtikelNr\` ASC;`;
 
         let self = this;
         return new Promise(function(_resolve, _reject){
             self.databaseConnection.query(articlesDataQuery, function(_error, _result){
 
-                let sortedOrderArticles = _order.orderArticles.sort(function(_orderArticleA, _orderArticleB){
-                    return _orderArticleA.articleId > _orderArticleB.articleId;
-                });
+
 
                 let stockWarnings = [];
                 for (let i = 0, promise = Promise.resolve(); i < _order.orderArticles.length; i++)
@@ -197,9 +204,10 @@ class OrderCreator
                     if (newStock < _result[i].minimum_stock)
                     {
                         stockWarnings.push({
-                            articleName: _orderArticle.articleId,
+                            articleId: _order.orderArticles[i].articleId,
+                            articleName: _result[i].article_name,
                             newStock: newStock,
-                            minimumStock: _minimumStock
+                            minimumStock: _result[i].minimum_stock
                         });
                     }
 
@@ -227,14 +235,16 @@ class OrderCreator
      */
     insertOrderArticleIntoOrderDetailsTable(_orderId, _orderArticle, _unitPrice)
     {
-        let insertOrderArticleQuery = `INSERT INTO \`bestelldetails\`
-                                       (?)
-                                       VALUES(?);`;
         let columnNames = [ "BestellNr", "ArtikelNr", "Einzelpreis", "Anzahl", "Rabatt"];
-        let columnValues = [ _orderId, _orderArticle.articleId, _unitPrice, _orderArticle.amount, _orderArticle.discount ];
+        let columnValues = [ _orderId, _orderArticle.articleId, _unitPrice, _orderArticle.amount, _orderArticle.discountPercent ];
 
+        let insertOrderArticleQuery = `INSERT INTO \`bestelldetails\`
+                                       (` + columnNames.join(",") + `)
+                                       VALUES(?);`;
+
+        let self = this;
         return new Promise(function(_resolve, _reject){
-            self.databaseConnection.query(insertOrderArticleQuery, [ columnNames, columnValues ], function(_error, _result){
+            self.databaseConnection.query(insertOrderArticleQuery, [ columnValues ], function(_error, _result){
                 if (_error) _reject(_error);
                 else _resolve("Added order article to \"bestelldetails\" table");
             });

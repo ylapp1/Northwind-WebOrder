@@ -201,7 +201,7 @@ CreateOrderDialog.prototype.saveOrder = function(_event)
             }
 
         }).catch(function(_errorMessage){
-            self.showErrorMessage(_errorMessage);
+            Utils.showErrorMessage(_errorMessage);
         });
     }
 };
