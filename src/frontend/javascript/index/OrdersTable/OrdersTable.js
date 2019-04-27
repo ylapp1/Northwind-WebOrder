@@ -60,8 +60,6 @@ OrdersTable.prototype.initializeConfig = function()
         pagination: true,
         search: true,
         filter: true,
-        filterShowClear: true,
-        hideUnusedSelectOptions: true,
 
         detailView: true,
 

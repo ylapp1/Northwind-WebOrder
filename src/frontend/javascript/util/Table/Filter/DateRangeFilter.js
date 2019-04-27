@@ -17,6 +17,9 @@ function DateRangeFilter(_parentTable, _targetFieldName, _filterFunction)
     this.elementId = this.targetFieldName + "-daterange-filter";
     this.filterFunction = _filterFunction;
 
+    this.currentSelectedMinDate = null;
+    this.currentSelectedMaxDate = null;
+
     this.initializeFlatPickr();
 }
 
@@ -25,6 +28,28 @@ DateRangeFilter.prototype.constructor = DateRangeFilter;
 
 
 // Public Methods
+
+/**
+ * Returns the current selected minimum date.
+ *
+ * @return {Date} The current selected minimum date
+ */
+DateRangeFilter.prototype.getCurrentSelectedMinDate = function()
+{
+    if (this.currentSelectedMinDate === null) return this.minDate;
+    else return this.currentSelectedMinDate;
+};
+
+/**
+ * Returns the current selected maximum date.
+ *
+ * @return {Date} The current selected maximum date
+ */
+DateRangeFilter.prototype.getCurrentSelectedMaxDate = function()
+{
+    if (this.currentSelectedMaxDate === null) return this.maxDate;
+    else return this.currentSelectedMaxDate;
+};
 
 /**
  * Sets the minimum and a maximum date for the date range picker.
@@ -40,14 +65,11 @@ DateRangeFilter.prototype.loadData = function(_minimumDate, _maximumDate)
     this.maxDate = _maximumDate;
     this.maxDate.setHours(23, 59, 59, 999);
 
-    this.currentSelectedMinDate = this.minDate;
-    this.currentSelectedMaxDate = this.maxDate;
-
     if (this.flatpickr)
     {
         this.flatpickr.set("minDate", this.minDate);
         this.flatpickr.set("maxDate", this.maxDate);
-        this.flatpickr.setDate([ this.currentSelectedMinDate, this.currentSelectedMaxDate ]);
+        this.flatpickr.setDate([ this.minDate, this.maxDate ]);
     }
 };
 
@@ -64,7 +86,7 @@ DateRangeFilter.prototype.rowMatchesFilter = function(_row)
     { // If no filter values are set every row matches
         return true;
     }
-    else return this.filterFunction(_row, this.currentSelectedMinDate, this.currentSelectedMaxDate);
+    else return this.filterFunction(_row, this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate());
 };
 
 
@@ -85,7 +107,7 @@ DateRangeFilter.prototype.onPostHeader = function()
         if (this.flatpickr) this.flatpickr.destroy();
         this.flatpickr = flatpickr(fixedTableBodyDateRangeFilter, this.getFlatpickrConfig());
     }
-    else fixedTableBodyDateRangeFilter._flatpickr.setDate([ this.currentSelectedMinDate, this.currentSelectedMaxDate ]);
+    else fixedTableBodyDateRangeFilter._flatpickr.setDate([ this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate() ]);
 };
 
 
@@ -137,7 +159,7 @@ DateRangeFilter.prototype.getFlatpickrConfig = function(_selectedDates)
         maxDate: this.maxDate,
 
         // Default values
-        defaultDate: [ this.currentSelectedMinDate, this.currentSelectedMaxDate ],
+        defaultDate: [ this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate() ],
         defaultHour: 0,
         defaultMinute: 0,
 
@@ -191,17 +213,17 @@ DateRangeFilter.prototype.onDateRangeFilterClose = function(_selectedDates)
     }
     else selectedMaxDate = this.maxDate;
 
-    // Check if the current selected dates must be changed
-    if (this.minDate === selectedMinDate && this.maxDate === selectedMaxDate)
-    {
-        this.currentSelectedMinDate = null;
-        this.currentSelectedMaxDate = null;
-    }
-    else if (this.currentSelectedMinDate !== selectedMinDate || this.currentSelectedMaxDate !== selectedMaxDate)
-    {
-        this.currentSelectedMinDate = selectedMinDate;
-        this.currentSelectedMaxDate = selectedMaxDate;
 
-        this.parentTable.applyFilters();
-    }
+    var dateRangeChanged = (! deepEqual(this.getCurrentSelectedMinDate(), selectedMinDate) ||
+                            ! deepEqual(this.getCurrentSelectedMaxDate(), selectedMaxDate));
+
+    // Check if the current selected dates must be changed
+    if (this.minDate === selectedMinDate) this.currentSelectedMinDate = null;
+    else this.currentSelectedMinDate = selectedMinDate;
+
+    if (this.maxDate === selectedMaxDate) this.currentSelectedMaxDate = null;
+    else this.currentSelectedMaxDate = selectedMaxDate;
+
+    if (dateRangeChanged) this.parentTable.applyFilters();
+    else this.flatpickr.setDate([this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate()]);
 };
