@@ -63,6 +63,58 @@ Table.prototype = {
         $(this.tableElement).bootstrapTable("load", filteredDataRows);
     },
 
+
+    /**
+     * Event handler that is called when one of the custom filters is filtered.
+     */
+    onFilter()
+    {
+        /*
+         * For some reason multiple filters at once do not work with the OrdersTable so this method manually filters the data rows
+         * and loads the filtered rows into the orders table.
+         */
+        var fixedTableHeader = $(this.tableElement).closest(".bootstrap-table").find(".fixed-table-header");
+
+        // Find the selected combo box values
+        var selectedValues = {};
+        $(fixedTableHeader).find("select").each(function(_i, _select){
+
+            var selectValue = $(_select).val();
+            if (selectValue !== "")
+            {
+                selectedValues[$(_select).data("filter-field")] = selectValue;
+            }
+        });
+
+        /*
+         * Check if the selected values match the last selected values, this is necessary to avoid a infinite loop because the load
+         * method triggeres this event handler.
+         */
+        if (deepEqual(this.lastSelectedValues, selectedValues)) return;
+        else this.lastSelectedValues = selectedValues;
+
+        var filteredRows = [];
+        this.dataRows.forEach(function(_row){
+
+            var rowMatchesFilters = true;
+            for (var fieldName in selectedValues)
+            {
+                if (selectedValues.hasOwnProperty(fieldName))
+                {
+                    if (selectedValues[fieldName] !== _row[fieldName])
+                    {
+                        rowMatchesFilters = false;
+                        break;
+                    }
+                }
+            }
+
+            if (rowMatchesFilters) filteredRows.push(_row);
+        });
+
+        $(this.tableElement).bootstrapTable("load", filteredRows);
+    },
+
     /**
      * Initializes all custom filters for this table.
      * @protected

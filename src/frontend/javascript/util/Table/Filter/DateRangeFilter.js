@@ -98,16 +98,16 @@ DateRangeFilter.prototype.rowMatchesFilter = function(_row)
 DateRangeFilter.prototype.onPostHeader = function()
 {
     // Find the input element inside the "fixed-table-header"
-    var fixedTableBody = $(this.parentTable.tableElement).closest(".bootstrap-table").find(".fixed-table-header");
-    var fixedTableBodyDateRangeFilter = $(fixedTableBody).find("input#" + this.elementId)[0];
+    var fixedTableHeader = $(this.parentTable.tableElement).closest(".bootstrap-table").find(".fixed-table-header");
+    var fixedTableHeaderDateRangeFilter = $(fixedTableHeader).find("input#" + this.elementId)[0];
 
-    if (! fixedTableBodyDateRangeFilter._flatpickr)
+    if (! fixedTableHeaderDateRangeFilter._flatpickr)
     { // If the element in the fixed table header is no flatpickr input
 
         if (this.flatpickr) this.flatpickr.destroy();
-        this.flatpickr = flatpickr(fixedTableBodyDateRangeFilter, this.getFlatpickrConfig());
+        this.flatpickr = flatpickr(fixedTableHeaderDateRangeFilter, this.getFlatpickrConfig());
     }
-    else fixedTableBodyDateRangeFilter._flatpickr.setDate([ this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate() ]);
+    else fixedTableHeaderDateRangeFilter._flatpickr.setDate([ this.getCurrentSelectedMinDate(), this.getCurrentSelectedMaxDate() ]);
 };
 
 
