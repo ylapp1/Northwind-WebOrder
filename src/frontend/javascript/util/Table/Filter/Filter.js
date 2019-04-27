@@ -62,7 +62,6 @@ Filter.prototype = {
     setFilterValue: function(_filterElement, _field, _value)
     {
         // Ignore the filter value, select2-filter doesn't know this Filter's value or how it does filtering
-        this.parentTable.onFilter();
     },
 
     /**

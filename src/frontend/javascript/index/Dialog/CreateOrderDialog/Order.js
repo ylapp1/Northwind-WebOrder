@@ -258,7 +258,7 @@ Order.prototype = {
             return {
                 articleId: _orderArticle.getArticle().article_id,
                 amount: _orderArticle.getAmount(),
-                discountPercent: _orderArticle.getDiscount()
+                discountPercent: _orderArticle.getDiscount() / 100
             };
         });
 

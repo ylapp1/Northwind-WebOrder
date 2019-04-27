@@ -11,6 +11,7 @@ function Table()
 {
     this.tableConfig = {};
     this.filters = [];
+    this.selectedComboBoxValues = {};
 }
 
 Table.prototype = {
@@ -56,52 +57,15 @@ Table.prototype = {
                 }
             }
 
-            if (rowMatchesFilters) filteredDataRows.push(_dataRow);
-        });
-
-        // Load the filtered data rows into the bootstrap table
-        $(this.tableElement).bootstrapTable("load", filteredDataRows);
-    },
-
-
-    /**
-     * Event handler that is called when one of the custom filters is filtered.
-     */
-    onFilter()
-    {
-        /*
-         * For some reason multiple filters at once do not work with the OrdersTable so this method manually filters the data rows
-         * and loads the filtered rows into the orders table.
-         */
-        var fixedTableHeader = $(this.tableElement).closest(".bootstrap-table").find(".fixed-table-header");
-
-        // Find the selected combo box values
-        var selectedValues = {};
-        $(fixedTableHeader).find("select").each(function(_i, _select){
-
-            var selectValue = $(_select).val();
-            if (selectValue !== "")
+            /*
+             * For some reason multiple combo box filters at once do not work with the OrdersTable so this method manually filters
+             * the data rows and loads the filtered rows into the orders table.
+             */
+            for (var fieldName in self.selectedComboBoxValues)
             {
-                selectedValues[$(_select).data("filter-field")] = selectValue;
-            }
-        });
-
-        /*
-         * Check if the selected values match the last selected values, this is necessary to avoid a infinite loop because the load
-         * method triggeres this event handler.
-         */
-        if (deepEqual(this.lastSelectedValues, selectedValues)) return;
-        else this.lastSelectedValues = selectedValues;
-
-        var filteredRows = [];
-        this.dataRows.forEach(function(_row){
-
-            var rowMatchesFilters = true;
-            for (var fieldName in selectedValues)
-            {
-                if (selectedValues.hasOwnProperty(fieldName))
+                if (self.selectedComboBoxValues.hasOwnProperty(fieldName))
                 {
-                    if (selectedValues[fieldName] !== _row[fieldName])
+                    if (self.selectedComboBoxValues[fieldName] !== _dataRow[fieldName])
                     {
                         rowMatchesFilters = false;
                         break;
@@ -109,10 +73,53 @@ Table.prototype = {
                 }
             }
 
-            if (rowMatchesFilters) filteredRows.push(_row);
+            if (rowMatchesFilters) filteredDataRows.push(_dataRow);
         });
 
-        $(this.tableElement).bootstrapTable("load", filteredRows);
+        // Load the filtered data rows into the bootstrap table
+        $(this.tableElement).bootstrapTable("load", filteredDataRows);
+    },
+
+    /**
+     * Event handler that is called after the rendering of the table header is finished.
+     */
+    onPostHeader: function()
+    {
+        var fixedTableHeaderSelectElements = $(this.tableElement).closest(".bootstrap-table").find(".fixed-table-header").find("select");
+
+        var self = this;
+        $(fixedTableHeaderSelectElements).on("select2:select", function(_event){
+            var dataField = $(_event.target).data("filter-field");
+            var selectedValue = $(_event.target).val();
+            if (selectedValue === "") selectedValue = null;
+
+            self.setSelectedComboBoxValue(dataField, selectedValue);
+        });
+
+        // Must use unselecting because unselect doesn't fire
+        $(fixedTableHeaderSelectElements).on("select2:unselecting", function(_event){
+            var dataField = $(_event.target).data("filter-field");
+            self.setSelectedComboBoxValue(dataField, null);
+        });
+    },
+
+    /**
+     * Sets the internally selected value of one of the combo box filters.
+     *
+     * @param {string} _dataField The name of the data field
+     * @param {mixed} _value The new value
+     */
+    setSelectedComboBoxValue: function(_dataField, _value)
+    {
+        var valueEqualsCurrentValue = ((! this.selectedComboBoxValues[_dataField] && _value === null) ||
+                                       this.selectedComboBoxValues[_dataField] === _value);
+
+        if (! valueEqualsCurrentValue)
+        {
+            if (_value === null) delete this.selectedComboBoxValues[_dataField];
+            else this.selectedComboBoxValues[_dataField] = _value;
+            this.applyFilters();
+        }
     },
 
     /**
@@ -146,6 +153,7 @@ Table.prototype = {
     {
         var self = this;
         this.addEventHandler("onPostHeader", function(){
+            self.onPostHeader();
             self.forwardEventToFilters("onPostHeader");
         });
 
