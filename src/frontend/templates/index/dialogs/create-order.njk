@@ -1,0 +1,54 @@
+{#
+ # @version 0.1
+ # @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ #}
+
+{# Dialog for the article selection in the create order dialog #}
+
+{% extends "util/dialog.njk" %}
+
+{% set dialogId = "createOrderDialog" %}
+{% set dialogTitle = "Neue Bestellung anlegen" %}
+
+{% block dialogBody %}
+  <form id="createOrderForm">
+
+    {# Combo boxes #}
+    <div class="form-inline" role="form">
+
+      <div class="form-group">
+        <label for="customer">Kunde</label>
+        <select id="customer" data-column="Kunde"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="worker">Sachbearbeiter</label>
+        <select id="worker" data-column="Vor- und Nachname des Sachbearbeiters"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="provider">Versandfirma</label>
+        <select id="provider" data-column="Lieferant"></select>
+      </div>
+
+    </div>
+
+    {# Add Article button #}
+    <button id="addOrderArticlesButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="div#addArticleDialog">
+      <i class="fas fa-plus"></i> Artikel hinzufügen ...
+    </button>
+
+    {# OrderArticles table #}
+    <table id="orderArticlesTable"></table>
+
+    {# Summary #}
+    <p id="effectivePriceParagraph">Gesamtpreis nach Abzug von Rabatten: <span id="effectivePrice"></span></p>
+
+  </form>
+
+{% endblock %}
+
+{% block dialogFooter %}
+    {# Add order button #}
+    <button id="saveOrderButton" class="btn btn-primary" type="submit">Bestellung eintragen</button>
+{% endblock %}

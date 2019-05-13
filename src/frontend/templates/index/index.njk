@@ -1,0 +1,48 @@
+{#
+ # @version 0.1
+ # @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ #}
+
+<!DOCTYPE html>
+<html lang="de">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Nordwind Bestellverwaltung</title>
+
+        {% include "index/libraries/external.njk" %}
+        {% include "index/libraries/internal.njk" %}
+    </head>
+
+    <body>
+        <header>
+            <h1>Nordwind Bestellverwaltung</h1>
+        </header>
+
+        <main>
+
+          {# Toolbar for the orders table #}
+          <div id="ordersTableToolbar">
+            <div class="form-inline" role="form">
+
+              {# Create order button #}
+              <div class="form-group">
+                <button class="btn btn-primary" data-toggle="modal" data-target="div#createOrderDialog">
+                  <i class="fas fa-plus"></i> Neue Bestellung anlegen ...
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          {# Table element for the orders table #}
+          <table id="ordersTable"></table>
+
+        </main>
+
+        {% include "index/dialogs/create-order.njk" %}
+        {% include "index/dialogs/add-article.njk" %}
+        {% include "index/dialogs/stocks-warnings.njk" %}
+
+    </body>
+</html>

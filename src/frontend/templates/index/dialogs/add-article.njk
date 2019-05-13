@@ -1,0 +1,20 @@
+{#
+ # @version 0.1
+ # @author Yannick Lapp <yannick.lapp@cn-consult.eu>
+ #}
+
+{# Dialog for the article selection in the create order dialog #}
+
+{% extends "util/dialog.njk" %}
+
+{% set dialogId = "addArticleDialog" %}
+{% set dialogTitle = "Artikel hinzufügen" %}
+
+{% block dialogBody %}
+    <table id="addArticlesTable"></table>
+{% endblock %}
+
+{% block dialogFooter %}
+    <button class="btn btn-primary" id="addArticlesButton">Ausgewählte Artikel der Bestellung hinzufügen</button>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+{% endblock %}
