@@ -264,7 +264,7 @@ class OrderValidator
         let articleIdsQuery = `SELECT
                                  \`artikel\`.\`ArtikelNr\` AS \`article_id\`
                                FROM \`artikel\`
-                               WHERE \`Artikel\`.\`ArtikelNr\` IN (` + articleIds.join(",") + `);`;
+                               WHERE \`artikel\`.\`ArtikelNr\` IN (` + articleIds.join(",") + `);`;
 
         let self = this;
         return new Promise(function(_resolve, _reject){

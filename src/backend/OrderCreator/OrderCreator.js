@@ -186,7 +186,7 @@ class OrderCreator
                                    \`artikel\`.\`Lagerbestand\` AS \`stock\`,
                                    \`artikel\`.\`Mindestbestand\` AS \`minimum_stock\`
                                  FROM \`artikel\`
-                                 WHERE \`Artikel\`.\`ArtikelNr\` IN (` + orderArticleIds.join(",") + `)
+                                 WHERE \`artikel\`.\`ArtikelNr\` IN (` + orderArticleIds.join(",") + `)
                                  ORDER BY \`artikel\`.\`ArtikelNr\` ASC;`;
 
         let self = this;
